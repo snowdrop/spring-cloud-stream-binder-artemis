@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.jboss.snowdrop.stream.binder.artemis;
+package org.jboss.snowdrop.stream.binder.artemis.provisioning;
 
 import org.springframework.cloud.stream.provisioning.ProducerDestination;
 

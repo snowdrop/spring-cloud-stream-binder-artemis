@@ -14,35 +14,29 @@
  * limitations under the License.
  */
 
-package org.jboss.snowdrop.stream.binder.artemis;
+package org.jboss.snowdrop.stream.binder.artemis.provisioning;
 
-import org.springframework.cloud.stream.provisioning.ProducerDestination;
-
-import java.util.List;
+import org.springframework.cloud.stream.provisioning.ConsumerDestination;
 
 /**
  * @author <a href="mailto:gytis@redhat.com">Gytis Trikleris</a>
  */
-public class ArtemisPartitionedProducerDestination implements ProducerDestination {
+public class ArtemisConsumerDestination implements ConsumerDestination {
 
-    private final List<String> addresses;
+    private final String address;
 
-    public ArtemisPartitionedProducerDestination(List<String> addresses) {
-        this.addresses = addresses;
+    public ArtemisConsumerDestination(String address) {
+        this.address = address;
     }
 
     @Override
     public String getName() {
-        throw new UnsupportedOperationException("This destination is not partitioned");
+        return address;
     }
 
     @Override
-    public String getNameForPartition(int partition) {
-        if (partition >= addresses.size() || partition < 0) {
-            throw new IllegalStateException(String.format("Partition '%d' doesn't exist", partition));
-        }
-
-        return addresses.get(partition);
+    public String toString() {
+        return String.format("%s{address='%s'}", ArtemisConsumerDestination.class.getSimpleName(), address);
     }
 
 }
