@@ -44,7 +44,7 @@ public class ArtemisProvisioningProvider implements
 
     private final ServerLocator serverLocator;
 
-    ArtemisProvisioningProvider(ServerLocator serverLocator) {
+    public ArtemisProvisioningProvider(ServerLocator serverLocator) {
         this.serverLocator = serverLocator;
     }
 
