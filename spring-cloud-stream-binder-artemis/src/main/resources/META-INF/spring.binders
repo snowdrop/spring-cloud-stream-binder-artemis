@@ -1,0 +1,2 @@
+artemis:\
+org.jboss.snowdrop.stream.binder.artemis.ArtemisJmsConfiguration

@@ -21,7 +21,12 @@
     <maven.compiler.target>1.8</maven.compiler.target>
 
     <artemis.version>2.1.0</artemis.version>
+    <assertj.version>3.8.0</assertj.version>
+    <awaitility.version>3.0.0</awaitility.version>
+    <junit.version>4.12</junit.version>
     <spring-cloud-stream.version>2.0.0.M1</spring-cloud-stream.version>
+    <spring-integration-java-dsl.version>1.2.2.RELEASE</spring-integration-java-dsl.version>
+    <spring-integration-jms.version>4.3.9.RELEASE</spring-integration-jms.version>
   </properties>
 
   <repositories>
@@ -43,6 +48,16 @@
         <version>${spring-cloud-stream.version}</version>
       </dependency>
       <dependency>
+        <groupId>org.springframework.integration</groupId>
+        <artifactId>spring-integration-jms</artifactId>
+        <version>${spring-integration-jms.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.springframework.integration</groupId>
+        <artifactId>spring-integration-java-dsl</artifactId>
+        <version>${spring-integration-java-dsl.version}</version>
+      </dependency>
+      <dependency>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-artemis</artifactId>
         <version>${spring-boot.version}</version>
@@ -51,6 +66,31 @@
         <groupId>org.apache.activemq</groupId>
         <artifactId>artemis-core-client</artifactId>
         <version>${artemis.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.activemq</groupId>
+        <artifactId>artemis-jms-server</artifactId>
+        <version>${artemis.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>junit</groupId>
+        <artifactId>junit</artifactId>
+        <version>${junit.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.assertj</groupId>
+        <artifactId>assertj-core</artifactId>
+        <version>${assertj.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.awaitility</groupId>
+        <artifactId>awaitility</artifactId>
+        <version>${awaitility.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-test</artifactId>
+        <version>${spring-boot.version}</version>
       </dependency>
     </dependencies>
   </dependencyManagement>
