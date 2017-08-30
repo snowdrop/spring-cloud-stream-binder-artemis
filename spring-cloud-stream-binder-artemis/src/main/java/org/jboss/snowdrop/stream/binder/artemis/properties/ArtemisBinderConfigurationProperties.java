@@ -24,8 +24,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @ConfigurationProperties("spring.cloud.stream.artemis.binder")
 public class ArtemisBinderConfigurationProperties {
 
-    // TODO value is only for testing, because properties don't work there
-    private String transport = "org.apache.activemq.artemis.core.remoting.impl.invm.InVMConnectorFactory";
+    private String transport;
 
     private String host;
 
@@ -35,11 +34,23 @@ public class ArtemisBinderConfigurationProperties {
         return transport;
     }
 
+    public void setTransport(String transport) {
+        this.transport = transport;
+    }
+
     public String getHost() {
         return host;
     }
 
+    public void setHost(String host) {
+        this.host = host;
+    }
+
     public String getPort() {
         return port;
+    }
+
+    public void setPort(String port) {
+        this.port = port;
     }
 }
