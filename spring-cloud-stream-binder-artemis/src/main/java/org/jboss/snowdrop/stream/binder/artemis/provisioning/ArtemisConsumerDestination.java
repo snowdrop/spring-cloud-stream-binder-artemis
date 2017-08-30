@@ -23,20 +23,20 @@ import org.springframework.cloud.stream.provisioning.ConsumerDestination;
  */
 public class ArtemisConsumerDestination implements ConsumerDestination {
 
-    private final String address;
+    private final String name;
 
-    public ArtemisConsumerDestination(String address) {
-        this.address = address;
+    public ArtemisConsumerDestination(String name) {
+        this.name = name;
     }
 
     @Override
     public String getName() {
-        return address;
+        return name;
     }
 
     @Override
     public String toString() {
-        return String.format("%s{address='%s'}", ArtemisConsumerDestination.class.getSimpleName(), address);
+        return String.format("%s{name='%s'}", ArtemisConsumerDestination.class.getSimpleName(), name);
     }
 
 }
