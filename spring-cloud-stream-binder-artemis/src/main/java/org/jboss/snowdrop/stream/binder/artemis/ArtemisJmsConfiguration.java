@@ -32,11 +32,13 @@ import org.springframework.cloud.stream.provisioning.ProvisioningProvider;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.jms.core.JmsTemplate;
+import org.springframework.jms.support.converter.MessageConverter;
 import org.springframework.util.StringUtils;
 
 import javax.jms.ConnectionFactory;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * TODO rename
@@ -50,15 +52,21 @@ import java.util.Map;
 public class ArtemisJmsConfiguration {
 
     @Bean
+    MessageConverter messageConverter(JmsTemplate jmsTemplate) {
+        MessageConverter messageConverter = jmsTemplate.getMessageConverter();
+        Objects.requireNonNull(messageConverter);
+        return messageConverter;
+    }
+
+    @Bean
     ArtemisMessageChannelBinder artemisMessageChannelBinder(ArtemisProvisioningProvider provisioningProvider,
-            JmsTemplate jmsTemplate, ConnectionFactory connectionFactory) {
-        return new ArtemisMessageChannelBinder(provisioningProvider, jmsTemplate,
-                connectionFactory);
+            ConnectionFactory connectionFactory, MessageConverter messageConverter) {
+        return new ArtemisMessageChannelBinder(provisioningProvider, connectionFactory, messageConverter);
     }
 
     @Bean
     @ConditionalOnMissingBean(TransportConfiguration.class)
-    public TransportConfiguration transportConfiguration(ArtemisBinderConfigurationProperties properties) {
+    TransportConfiguration transportConfiguration(ArtemisBinderConfigurationProperties properties) {
         Map<String, Object> config = new HashMap<>();
         if (!StringUtils.isEmpty(properties.getHost())) {
             config.put("host", properties.getHost());
@@ -71,19 +79,19 @@ public class ArtemisJmsConfiguration {
 
     @Bean
     @ConditionalOnMissingBean(ServerLocator.class)
-    public ServerLocator serverLocator(TransportConfiguration transportConfiguration) {
+    ServerLocator serverLocator(TransportConfiguration transportConfiguration) {
         return ActiveMQClient.createServerLocatorWithoutHA(transportConfiguration);
     }
 
     @Bean
     @ConditionalOnMissingBean
-    public ConnectionFactory connectionFactory(TransportConfiguration transportConfiguration) {
+    ConnectionFactory connectionFactory(TransportConfiguration transportConfiguration) {
         return ActiveMQJMSClient.createConnectionFactoryWithoutHA(JMSFactoryType.CF, transportConfiguration);
     }
 
     @Bean
     @ConditionalOnMissingBean(ProvisioningProvider.class)
-    public ArtemisProvisioningProvider provisioningProvider(ServerLocator serverLocator) {
+    ArtemisProvisioningProvider provisioningProvider(ServerLocator serverLocator) {
         return new ArtemisProvisioningProvider(serverLocator);
     }
 

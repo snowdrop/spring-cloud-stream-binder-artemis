@@ -17,9 +17,14 @@
 package org.jboss.snowdrop.stream.binder.artemis;
 
 import org.springframework.integration.handler.AbstractMessageHandler;
-import org.springframework.jms.core.JmsTemplate;
+import org.springframework.jms.support.converter.MessageConverter;
 import org.springframework.messaging.Message;
 
+import javax.jms.Connection;
+import javax.jms.ConnectionFactory;
+import javax.jms.MessageProducer;
+import javax.jms.Session;
+import javax.jms.Topic;
 import java.util.Objects;
 
 /**
@@ -29,11 +34,15 @@ public class ArtemisMessageHandler extends AbstractMessageHandler {
 
     private final String destination;
 
-    private final JmsTemplate jmsTemplate;
+    private final ConnectionFactory connectionFactory;
 
-    public ArtemisMessageHandler(String destination, JmsTemplate jmsTemplate) {
+    private final MessageConverter messageConverter;
+
+    public ArtemisMessageHandler(String destination, ConnectionFactory connectionFactory,
+            MessageConverter messageConverter) {
         this.destination = destination;
-        this.jmsTemplate = jmsTemplate;
+        this.connectionFactory = connectionFactory;
+        this.messageConverter = messageConverter;
     }
 
     @Override
@@ -42,7 +51,14 @@ public class ArtemisMessageHandler extends AbstractMessageHandler {
         // TODO handle partitions
         // TODO handle headers
 
-        jmsTemplate.convertAndSend(destination, message.getPayload());
+        // TODO use JMSContext instead
+        try (Connection connection = connectionFactory.createConnection();
+             Session session = connection.createSession()) {
+            Topic topic = session.createTopic(destination);
+            javax.jms.Message jmsMessage = messageConverter.toMessage(message.getPayload(), session);
+            MessageProducer producer = session.createProducer(topic);
+            producer.send(jmsMessage);
+        }
     }
 
 }

@@ -25,15 +25,13 @@ import org.springframework.cloud.stream.provisioning.ProducerDestination;
 import org.springframework.integration.core.MessageProducer;
 import org.springframework.integration.dsl.jms.JmsMessageDrivenChannelAdapter;
 import org.springframework.integration.jms.ChannelPublishingJmsMessageListener;
-import org.springframework.jms.core.JmsTemplate;
 import org.springframework.jms.listener.AbstractMessageListenerContainer;
 import org.springframework.jms.listener.DefaultMessageListenerContainer;
+import org.springframework.jms.support.converter.MessageConverter;
 import org.springframework.messaging.MessageHandler;
 
-import javax.jms.Connection;
 import javax.jms.ConnectionFactory;
-import javax.jms.Destination;
-import javax.jms.Session;
+import javax.jms.JMSContext;
 import javax.jms.Topic;
 
 /**
@@ -44,15 +42,15 @@ public class ArtemisMessageChannelBinder
 
     private static final String[] DEFAULT_HEADERS = new String[0];
 
-    private final JmsTemplate jmsTemplate;
-
     private final ConnectionFactory connectionFactory;
 
-    public ArtemisMessageChannelBinder(ArtemisProvisioningProvider provisioningProvider, JmsTemplate jmsTemplate,
-            ConnectionFactory connectionFactory) {
+    private final MessageConverter messageConverter;
+
+    public ArtemisMessageChannelBinder(ArtemisProvisioningProvider provisioningProvider,
+            ConnectionFactory connectionFactory, MessageConverter messageConverter) {
         super(true, DEFAULT_HEADERS, provisioningProvider);
-        this.jmsTemplate = jmsTemplate;
         this.connectionFactory = connectionFactory;
+        this.messageConverter = messageConverter;
     }
 
     @Override
@@ -65,30 +63,27 @@ public class ArtemisMessageChannelBinder
             // TODO
             throw new UnsupportedOperationException();
         } else {
-            return new ArtemisMessageHandler(destination.getName(), jmsTemplate);
+            return new ArtemisMessageHandler(destination.getName(), connectionFactory, messageConverter);
         }
     }
 
     @Override
     protected MessageProducer createConsumerEndpoint(ConsumerDestination destination, String group,
             ConsumerProperties properties) throws Exception {
+        try (JMSContext context = connectionFactory.createContext()) {
+            Topic topic = context.createTopic(destination.getName());
 
-        System.out.printf("Creating consumer endpoint: %s\n", destination.getName());
-
-        try (Connection connection = connectionFactory.createConnection();
-             Session session = connection.createSession(true, 1)) {
-            Topic topic = session.createTopic(destination.getName());
-
-            AbstractMessageListenerContainer messageListenerContainer = getMessageListenerContainer(topic);
+            AbstractMessageListenerContainer messageListenerContainer = getMessageListenerContainer(topic, group);
             return new JmsMessageDrivenChannelAdapter(messageListenerContainer,
                     new ChannelPublishingJmsMessageListener());
         }
     }
 
     // TODO extract
-    private AbstractMessageListenerContainer getMessageListenerContainer(Destination destination) {
+    private AbstractMessageListenerContainer getMessageListenerContainer(Topic topic, String group) {
         DefaultMessageListenerContainer listenerContainer = new DefaultMessageListenerContainer();
-        listenerContainer.setDestination(destination);
+        listenerContainer.setDestination(topic);
+        listenerContainer.setSubscriptionName(group);
         listenerContainer.setPubSubDomain(true);
         listenerContainer.setConnectionFactory(connectionFactory);
         listenerContainer.setSessionTransacted(true);

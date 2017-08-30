@@ -16,17 +16,19 @@
 
 package org.jboss.snowdrop.stream.binder.artemis.integration;
 
-import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.jms.core.JmsTemplate;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import javax.jms.ConnectionFactory;
+import javax.jms.JMSConsumer;
+import javax.jms.JMSContext;
 import javax.jms.JMSException;
-import javax.jms.Message;
+import javax.jms.JMSProducer;
+import javax.jms.Topic;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -38,10 +40,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class ArtemisBinderIT {
 
     @Autowired
-    private JmsTemplate template;
-
-    @Value("${spring.cloud.stream.bindings.input.group}")
-    private String inputGroup;
+    private ConnectionFactory connectionFactory;
 
     @Value("${spring.cloud.stream.bindings.input.destination}")
     private String inputDestination;
@@ -49,23 +48,22 @@ public class ArtemisBinderIT {
     @Value("${spring.cloud.stream.bindings.output.destination}")
     private String outputDestination;
 
-    @BeforeClass
-    public static void setup() {
-
-    }
-
     @Test
     public void testSendAndReceive() throws JMSException {
-        String originalMessageText = "test message";
+        String originalMessage = "test message";
 
-        String inputAddress = String.format("%s::%s", inputDestination, inputGroup);
-        template.send(inputAddress, s -> s.createTextMessage(originalMessageText));
+        try (JMSContext context = connectionFactory.createContext()) {
+            Topic inputTopic = context.createTopic(inputDestination);
+            Topic outputTopic = context.createTopic(outputDestination);
 
-        Message resultMessage = template.receive(outputDestination);
-        assertThat(resultMessage).isNotNull();
+            JMSProducer producer = context.createProducer();
+            JMSConsumer consumer = context.createSharedConsumer(outputTopic, "test");
 
-        String resultMessageText = new String(resultMessage.getBody(byte[].class));
-        assertThat(resultMessageText).isEqualTo(originalMessageText.toUpperCase());
+            producer.send(inputTopic, originalMessage);
+
+            String receivedMessage = new String(consumer.receiveBody(byte[].class, 5000));
+            assertThat(receivedMessage).isEqualTo(originalMessage.toUpperCase());
+        }
     }
 
 }
