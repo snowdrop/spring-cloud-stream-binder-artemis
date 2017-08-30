@@ -11,16 +11,16 @@ import static org.assertj.core.api.Assertions.fail;
 public class ArtemisProducerDestinationTest {
 
     @Test
-    public void getName() {
-        String address = "test-address";
-        ArtemisProducerDestination destination = new ArtemisProducerDestination(address);
-        assertThat(destination.getName()).isEqualTo(address);
+    public void shouldGetName() {
+        String name = "test-name";
+        ArtemisProducerDestination destination = new ArtemisProducerDestination(name);
+        assertThat(destination.getName()).isEqualTo(name);
     }
 
     @Test
-    public void getNameForPartition() {
-        String address = "test-address";
-        ArtemisProducerDestination destination = new ArtemisProducerDestination(address);
+    public void shouldFailToGetNameForPartition() {
+        String name = "test-name";
+        ArtemisProducerDestination destination = new ArtemisProducerDestination(name);
         try {
             destination.getNameForPartition(0);
             fail("Exception was expected");

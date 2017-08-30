@@ -23,15 +23,15 @@ import org.springframework.cloud.stream.provisioning.ProducerDestination;
  */
 public class ArtemisProducerDestination implements ProducerDestination {
 
-    private final String address;
+    private final String name;
 
-    public ArtemisProducerDestination(String address) {
-        this.address = address;
+    public ArtemisProducerDestination(String name) {
+        this.name = name;
     }
 
     @Override
     public String getName() {
-        return address;
+        return name;
     }
 
     @Override
@@ -41,6 +41,6 @@ public class ArtemisProducerDestination implements ProducerDestination {
 
     @Override
     public String toString() {
-        return String.format("%s{address='%s'}", ArtemisProducerDestination.class.getSimpleName(), address);
+        return String.format("%s{name='%s'}", ArtemisProducerDestination.class.getSimpleName(), name);
     }
 }

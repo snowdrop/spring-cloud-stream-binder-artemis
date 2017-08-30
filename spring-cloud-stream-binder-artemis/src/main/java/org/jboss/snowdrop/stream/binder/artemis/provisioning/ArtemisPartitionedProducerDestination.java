@@ -25,24 +25,29 @@ import java.util.List;
  */
 public class ArtemisPartitionedProducerDestination implements ProducerDestination {
 
-    private final List<String> addresses;
+    private final List<String> names;
 
-    public ArtemisPartitionedProducerDestination(List<String> addresses) {
-        this.addresses = addresses;
+    public ArtemisPartitionedProducerDestination(List<String> names) {
+        this.names = names;
     }
 
     @Override
     public String getName() {
-        throw new UnsupportedOperationException("This destination is not partitioned");
+        throw new UnsupportedOperationException("This destination is partitioned");
     }
 
     @Override
     public String getNameForPartition(int partition) {
-        if (partition >= addresses.size() || partition < 0) {
+        if (partition >= names.size() || partition < 0) {
             throw new IllegalStateException(String.format("Partition '%d' doesn't exist", partition));
         }
 
-        return addresses.get(partition);
+        return names.get(partition);
+    }
+
+    @Override
+    public String toString() {
+        return String.format("%s{names=%s}", ArtemisPartitionedProducerDestination.class.getSimpleName(), names);
     }
 
 }
