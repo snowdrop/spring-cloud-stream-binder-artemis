@@ -42,14 +42,22 @@ public class ArtemisProvisioningProvider implements ProvisioningProvider<Consume
         this.serverLocator = serverLocator;
     }
 
+    /**
+     * Provision all addresses and queues required for the producer.
+     *
+     * @param address Artemis address to route messages to.
+     * @param properties Producer specific properties.
+     * @return
+     * @throws ProvisioningException
+     */
     @Override
-    public ProducerDestination provisionProducerDestination(String name, ProducerProperties properties)
+    public ProducerDestination provisionProducerDestination(String address, ProducerProperties properties)
             throws ProvisioningException {
 //        if (properties.isPartitioned()) {
 //            return provisionPartitionedDestination(name, properties.getPartitionCount());
 //        }
 
-        return provisionUnpartitionedDestination(name, properties);
+        return provisionUnpartitionedDestination(address, properties);
     }
 
     @Override
