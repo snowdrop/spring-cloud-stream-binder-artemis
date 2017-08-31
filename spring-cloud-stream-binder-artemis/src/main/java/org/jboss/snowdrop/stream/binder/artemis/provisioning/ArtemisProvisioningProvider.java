@@ -27,6 +27,9 @@ import org.springframework.cloud.stream.provisioning.ProvisioningException;
 import org.springframework.cloud.stream.provisioning.ProvisioningProvider;
 
 import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import static org.apache.activemq.artemis.api.core.RoutingType.MULTICAST;
 import static org.apache.activemq.artemis.api.core.SimpleString.toSimpleString;
@@ -45,7 +48,7 @@ public class ArtemisProvisioningProvider implements ProvisioningProvider<Consume
     /**
      * Provision all addresses and queues required for the producer.
      *
-     * @param address Artemis address to route messages to.
+     * @param address    Artemis address to route messages to.
      * @param properties Producer specific properties.
      * @return
      * @throws ProvisioningException
@@ -53,9 +56,9 @@ public class ArtemisProvisioningProvider implements ProvisioningProvider<Consume
     @Override
     public ProducerDestination provisionProducerDestination(String address, ProducerProperties properties)
             throws ProvisioningException {
-//        if (properties.isPartitioned()) {
-//            return provisionPartitionedDestination(name, properties.getPartitionCount());
-//        }
+        if (properties.isPartitioned()) {
+            return provisionPartitionedDestination(address, properties);
+        }
 
         return provisionUnpartitionedDestination(address, properties);
     }
@@ -79,18 +82,24 @@ public class ArtemisProvisioningProvider implements ProvisioningProvider<Consume
         // Create address to send messages to
         createAddress(address);
         // Create queues for each group so that messages could be persisted until consumer register
-        Arrays.stream(properties.getRequiredGroups())
-                .forEach(group -> createQueue(address, group));
+        provisionGroups(address, properties.getRequiredGroups());
         return new ArtemisProducerDestination(address);
     }
 
-//    private ArtemisPartitionedProducerDestination provisionPartitionedDestination(String name, int partitionsCount) {
-//        List<String> addresses = IntStream.range(0, partitionsCount)
-//                .mapToObj(i -> getPartitionedAddress(name, i))
-//                .peek(this::createAddress)
-//                .collect(Collectors.toList());
-//        return new ArtemisPartitionedProducerDestination(addresses);
-//    }
+    private ArtemisPartitionedProducerDestination provisionPartitionedDestination(String address,
+            ProducerProperties properties) {
+        List<String> addresses = IntStream.range(0, properties.getPartitionCount())
+                .mapToObj(i -> String.format("%s-%d", address, i))
+                .peek(this::createAddress)
+                .peek(partitionAddress -> provisionGroups(partitionAddress, properties.getRequiredGroups()))
+                .collect(Collectors.toList());
+        return new ArtemisPartitionedProducerDestination(addresses);
+    }
+
+    private void provisionGroups(String address, String[] groups) {
+        Arrays.stream(groups)
+                .forEach(group -> createQueue(address, group));
+    }
 
     private void createAddress(String name) {
         try (ClientSessionFactory sessionFactory = serverLocator.createSessionFactory();
@@ -110,10 +119,5 @@ public class ArtemisProvisioningProvider implements ProvisioningProvider<Consume
                     String.format("Failed to create queue '%s' with address '%s'", name, address));
         }
     }
-
-
-//    private String getPartitionedAddress(String address, int partition) {
-//        return String.format("%s-%d", address, partition);
-//    }
 
 }

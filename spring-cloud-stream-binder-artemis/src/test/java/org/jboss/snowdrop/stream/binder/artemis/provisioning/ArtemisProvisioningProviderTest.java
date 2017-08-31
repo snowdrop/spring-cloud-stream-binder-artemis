@@ -87,15 +87,50 @@ public class ArtemisProvisioningProviderTest {
     }
 
     @Test
-    @Ignore
-    public void shouldProvisionPartitionedProducer() {
+    public void shouldProvisionPartitionedProducer() throws ActiveMQException {
+        String partitionedAddress0 = String.format("%s-%d", address, 0);
+        String partitionedAddress1 = String.format("%s-%d", address, 1);
 
+        when(mockProducerProperties.isPartitioned()).thenReturn(true);
+        when(mockProducerProperties.getPartitionCount()).thenReturn(2);
+
+        ProducerDestination destination = provider.provisionProducerDestination(address, mockProducerProperties);
+
+        assertThat(destination).isInstanceOf(ArtemisPartitionedProducerDestination.class);
+        assertThat(destination.getNameForPartition(0)).isEqualTo(partitionedAddress0);
+        assertThat(destination.getNameForPartition(1)).isEqualTo(partitionedAddress1);
+
+        verify(mockClientSession, times(1)).createAddress(toSimpleString(partitionedAddress0), MULTICAST, true);
+        verify(mockClientSession, times(1)).createAddress(toSimpleString(partitionedAddress1), MULTICAST, true);
+        verify(mockClientSession, times(0)).createSharedQueue(any(SimpleString.class), any(RoutingType.class),
+                any(SimpleString.class), anyBoolean());
     }
 
     @Test
-    @Ignore
-    public void shouldProvisionPartitionedProducerWithRequiredGroups() {
+    public void shouldProvisionPartitionedProducerWithRequiredGroups() throws ActiveMQException {
+        String partitionedAddress0 = String.format("%s-%d", address, 0);
+        String partitionedAddress1 = String.format("%s-%d", address, 1);
 
+        when(mockProducerProperties.getRequiredGroups()).thenReturn(groups);
+        when(mockProducerProperties.isPartitioned()).thenReturn(true);
+        when(mockProducerProperties.getPartitionCount()).thenReturn(2);
+
+        ProducerDestination destination = provider.provisionProducerDestination(address, mockProducerProperties);
+
+        assertThat(destination).isInstanceOf(ArtemisPartitionedProducerDestination.class);
+        assertThat(destination.getNameForPartition(0)).isEqualTo(partitionedAddress0);
+        assertThat(destination.getNameForPartition(1)).isEqualTo(partitionedAddress1);
+
+        verify(mockClientSession, times(1)).createAddress(toSimpleString(partitionedAddress0), MULTICAST, true);
+        verify(mockClientSession, times(1)).createAddress(toSimpleString(partitionedAddress1), MULTICAST, true);
+        verify(mockClientSession, times(1)).createSharedQueue(toSimpleString(partitionedAddress0), MULTICAST,
+                toSimpleString(groups[0]), true);
+        verify(mockClientSession, times(1)).createSharedQueue(toSimpleString(partitionedAddress0), MULTICAST,
+                toSimpleString(groups[1]), true);
+        verify(mockClientSession, times(1)).createSharedQueue(toSimpleString(partitionedAddress1), MULTICAST,
+                toSimpleString(groups[0]), true);
+        verify(mockClientSession, times(1)).createSharedQueue(toSimpleString(partitionedAddress1), MULTICAST,
+                toSimpleString(groups[1]), true);
     }
 
     @Test
