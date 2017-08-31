@@ -48,10 +48,6 @@ public class ArtemisMessageHandler extends AbstractMessageHandler {
     @Override
     protected void handleMessageInternal(org.springframework.messaging.Message<?> message) throws Exception {
         Objects.requireNonNull(message);
-        // TODO handle partitions
-        // TODO handle headers
-
-        // TODO use JMSContext instead
         try (Connection connection = connectionFactory.createConnection();
              Session session = connection.createSession()) {
             Topic topic = session.createTopic(address);
