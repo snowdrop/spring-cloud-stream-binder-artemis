@@ -18,10 +18,10 @@ package org.jboss.snowdrop.stream.binder.artemis;
 
 import org.springframework.integration.handler.AbstractMessageHandler;
 import org.springframework.jms.support.converter.MessageConverter;
-import org.springframework.messaging.Message;
 
 import javax.jms.Connection;
 import javax.jms.ConnectionFactory;
+import javax.jms.Message;
 import javax.jms.MessageProducer;
 import javax.jms.Session;
 import javax.jms.Topic;
@@ -32,21 +32,21 @@ import java.util.Objects;
  */
 public class ArtemisMessageHandler extends AbstractMessageHandler {
 
-    private final String destination;
+    private final String address;
 
     private final ConnectionFactory connectionFactory;
 
     private final MessageConverter messageConverter;
 
-    public ArtemisMessageHandler(String destination, ConnectionFactory connectionFactory,
+    public ArtemisMessageHandler(String address, ConnectionFactory connectionFactory,
             MessageConverter messageConverter) {
-        this.destination = destination;
+        this.address = address;
         this.connectionFactory = connectionFactory;
         this.messageConverter = messageConverter;
     }
 
     @Override
-    protected void handleMessageInternal(Message<?> message) throws Exception {
+    protected void handleMessageInternal(org.springframework.messaging.Message<?> message) throws Exception {
         Objects.requireNonNull(message);
         // TODO handle partitions
         // TODO handle headers
@@ -54,8 +54,8 @@ public class ArtemisMessageHandler extends AbstractMessageHandler {
         // TODO use JMSContext instead
         try (Connection connection = connectionFactory.createConnection();
              Session session = connection.createSession()) {
-            Topic topic = session.createTopic(destination);
-            javax.jms.Message jmsMessage = messageConverter.toMessage(message.getPayload(), session);
+            Topic topic = session.createTopic(address);
+            Message jmsMessage = messageConverter.toMessage(message.getPayload(), session);
             MessageProducer producer = session.createProducer(topic);
             producer.send(jmsMessage);
         }
