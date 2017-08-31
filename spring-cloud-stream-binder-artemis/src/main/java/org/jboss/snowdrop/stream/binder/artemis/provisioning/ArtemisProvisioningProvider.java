@@ -66,15 +66,19 @@ public class ArtemisProvisioningProvider implements ProvisioningProvider<Consume
     @Override
     public ConsumerDestination provisionConsumerDestination(String address, String group, ConsumerProperties properties)
             throws ProvisioningException {
-//        if (properties.isPartitioned()) {
-//            return new ArtemisConsumerDestination(getPartitionedAddress(name, properties.getInstanceCount()));
-//        }
+        ArtemisConsumerDestination destination;
 
-        // TODO this might not be required as listener should create a queue if one doesn't exist
-        createAddress(address);
-        createQueue(address, group);
+        if (properties.isPartitioned()) {
+            destination =
+                    new ArtemisConsumerDestination(String.format("%s-%d", address, properties.getInstanceIndex()));
+        } else {
+            destination = new ArtemisConsumerDestination(address);
+        }
 
-        return new ArtemisConsumerDestination(address);
+        createAddress(destination.getName());
+        createQueue(destination.getName(), group);
+
+        return destination;
     }
 
     private ArtemisProducerDestination provisionUnpartitionedDestination(String address,
