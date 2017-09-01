@@ -16,10 +16,14 @@
 
 package org.jboss.snowdrop.stream.binder.artemis;
 
+import org.jboss.snowdrop.stream.binder.artemis.properties.ArtemisConsumerProperties;
+import org.jboss.snowdrop.stream.binder.artemis.properties.ArtemisExtendedBindingProperties;
+import org.jboss.snowdrop.stream.binder.artemis.properties.ArtemisProducerProperties;
 import org.jboss.snowdrop.stream.binder.artemis.provisioning.ArtemisProvisioningProvider;
 import org.springframework.cloud.stream.binder.AbstractMessageChannelBinder;
-import org.springframework.cloud.stream.binder.ConsumerProperties;
-import org.springframework.cloud.stream.binder.ProducerProperties;
+import org.springframework.cloud.stream.binder.ExtendedConsumerProperties;
+import org.springframework.cloud.stream.binder.ExtendedProducerProperties;
+import org.springframework.cloud.stream.binder.ExtendedPropertiesBinder;
 import org.springframework.cloud.stream.provisioning.ConsumerDestination;
 import org.springframework.cloud.stream.provisioning.ProducerDestination;
 import org.springframework.integration.core.MessageProducer;
@@ -28,6 +32,7 @@ import org.springframework.integration.jms.ChannelPublishingJmsMessageListener;
 import org.springframework.jms.listener.AbstractMessageListenerContainer;
 import org.springframework.jms.listener.DefaultMessageListenerContainer;
 import org.springframework.jms.support.converter.MessageConverter;
+import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.MessageHandler;
 
 import javax.jms.ConnectionFactory;
@@ -37,8 +42,10 @@ import javax.jms.Topic;
 /**
  * @author <a href="mailto:gytis@redhat.com">Gytis Trikleris</a>
  */
-public class ArtemisMessageChannelBinder
-        extends AbstractMessageChannelBinder<ConsumerProperties, ProducerProperties, ArtemisProvisioningProvider> {
+public class ArtemisMessageChannelBinder extends
+        AbstractMessageChannelBinder<ExtendedConsumerProperties<ArtemisConsumerProperties>,
+                ExtendedProducerProperties<ArtemisProducerProperties>, ArtemisProvisioningProvider>
+        implements ExtendedPropertiesBinder<MessageChannel, ArtemisConsumerProperties, ArtemisProducerProperties> {
 
     private static final String[] DEFAULT_HEADERS = new String[0];
 
@@ -46,19 +53,20 @@ public class ArtemisMessageChannelBinder
 
     private final MessageConverter messageConverter;
 
+    private final ArtemisExtendedBindingProperties bindingProperties;
+
     public ArtemisMessageChannelBinder(ArtemisProvisioningProvider provisioningProvider,
-            ConnectionFactory connectionFactory, MessageConverter messageConverter) {
+            ConnectionFactory connectionFactory, MessageConverter messageConverter,
+            ArtemisExtendedBindingProperties bindingProperties) {
         super(true, DEFAULT_HEADERS, provisioningProvider);
         this.connectionFactory = connectionFactory;
         this.messageConverter = messageConverter;
+        this.bindingProperties = bindingProperties;
     }
 
     @Override
     protected MessageHandler createProducerMessageHandler(ProducerDestination destination,
-            ProducerProperties properties) throws Exception {
-
-        System.out.printf("Creating producer handler: %s\n", destination.getName());
-
+            ExtendedProducerProperties<ArtemisProducerProperties> properties) throws Exception {
         if (properties.isPartitioned()) {
             // TODO
             throw new UnsupportedOperationException();
@@ -69,7 +77,7 @@ public class ArtemisMessageChannelBinder
 
     @Override
     protected MessageProducer createConsumerEndpoint(ConsumerDestination destination, String group,
-            ConsumerProperties properties) throws Exception {
+            ExtendedConsumerProperties<ArtemisConsumerProperties> properties) throws Exception {
         try (JMSContext context = connectionFactory.createContext()) {
             Topic topic = context.createTopic(destination.getName());
 
@@ -90,5 +98,15 @@ public class ArtemisMessageChannelBinder
         listenerContainer.setSubscriptionDurable(true);
         listenerContainer.setSubscriptionShared(true);
         return listenerContainer;
+    }
+
+    @Override
+    public ArtemisConsumerProperties getExtendedConsumerProperties(String channelName) {
+        return bindingProperties.getExtendedConsumerProperties(channelName);
+    }
+
+    @Override
+    public ArtemisProducerProperties getExtendedProducerProperties(String channelName) {
+        return bindingProperties.getExtendedProducerProperties(channelName);
     }
 }

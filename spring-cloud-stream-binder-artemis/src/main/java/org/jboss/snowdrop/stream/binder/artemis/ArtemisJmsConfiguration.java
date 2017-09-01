@@ -19,9 +19,8 @@ package org.jboss.snowdrop.stream.binder.artemis;
 import org.apache.activemq.artemis.api.core.TransportConfiguration;
 import org.apache.activemq.artemis.api.core.client.ActiveMQClient;
 import org.apache.activemq.artemis.api.core.client.ServerLocator;
-import org.apache.activemq.artemis.api.jms.ActiveMQJMSClient;
-import org.apache.activemq.artemis.api.jms.JMSFactoryType;
 import org.jboss.snowdrop.stream.binder.artemis.properties.ArtemisBinderConfigurationProperties;
+import org.jboss.snowdrop.stream.binder.artemis.properties.ArtemisExtendedBindingProperties;
 import org.jboss.snowdrop.stream.binder.artemis.provisioning.ArtemisProvisioningProvider;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
@@ -32,13 +31,11 @@ import org.springframework.cloud.stream.provisioning.ProvisioningProvider;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.jms.core.JmsTemplate;
-import org.springframework.jms.support.converter.MessageConverter;
 import org.springframework.util.StringUtils;
 
 import javax.jms.ConnectionFactory;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
 
 /**
  * TODO rename
@@ -48,20 +45,16 @@ import java.util.Objects;
 @Configuration
 @AutoConfigureAfter(JndiConnectionFactoryAutoConfiguration.class)
 @ConditionalOnClass(ServerLocator.class)
-@EnableConfigurationProperties(ArtemisBinderConfigurationProperties.class)
+@EnableConfigurationProperties({ArtemisBinderConfigurationProperties.class, ArtemisExtendedBindingProperties.class})
 public class ArtemisJmsConfiguration {
 
     @Bean
-    MessageConverter messageConverter(JmsTemplate jmsTemplate) {
-        MessageConverter messageConverter = jmsTemplate.getMessageConverter();
-        Objects.requireNonNull(messageConverter);
-        return messageConverter;
-    }
-
-    @Bean
+    @ConditionalOnMissingBean
     ArtemisMessageChannelBinder artemisMessageChannelBinder(ArtemisProvisioningProvider provisioningProvider,
-            ConnectionFactory connectionFactory, MessageConverter messageConverter) {
-        return new ArtemisMessageChannelBinder(provisioningProvider, connectionFactory, messageConverter);
+            ConnectionFactory connectionFactory, JmsTemplate jmsTemplate,
+            ArtemisExtendedBindingProperties bindingProperties) {
+        return new ArtemisMessageChannelBinder(provisioningProvider, connectionFactory,
+                jmsTemplate.getMessageConverter(), bindingProperties);
     }
 
     @Bean
@@ -81,12 +74,6 @@ public class ArtemisJmsConfiguration {
     @ConditionalOnMissingBean(ServerLocator.class)
     ServerLocator serverLocator(TransportConfiguration transportConfiguration) {
         return ActiveMQClient.createServerLocatorWithoutHA(transportConfiguration);
-    }
-
-    @Bean
-    @ConditionalOnMissingBean
-    ConnectionFactory connectionFactory(TransportConfiguration transportConfiguration) {
-        return ActiveMQJMSClient.createConnectionFactoryWithoutHA(JMSFactoryType.CF, transportConfiguration);
     }
 
     @Bean

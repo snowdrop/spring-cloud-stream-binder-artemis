@@ -1,12 +1,15 @@
 package org.jboss.snowdrop.stream.binder.artemis;
 
+import org.jboss.snowdrop.stream.binder.artemis.properties.ArtemisConsumerProperties;
+import org.jboss.snowdrop.stream.binder.artemis.properties.ArtemisExtendedBindingProperties;
+import org.jboss.snowdrop.stream.binder.artemis.properties.ArtemisProducerProperties;
 import org.jboss.snowdrop.stream.binder.artemis.provisioning.ArtemisProvisioningProvider;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.springframework.cloud.stream.binder.ConsumerProperties;
-import org.springframework.cloud.stream.binder.ProducerProperties;
+import org.springframework.cloud.stream.binder.ExtendedConsumerProperties;
+import org.springframework.cloud.stream.binder.ExtendedProducerProperties;
 import org.springframework.cloud.stream.provisioning.ConsumerDestination;
 import org.springframework.cloud.stream.provisioning.ProducerDestination;
 import org.springframework.integration.core.MessageProducer;
@@ -55,10 +58,13 @@ public class ArtemisMessageChannelBinderTest {
     private ConsumerDestination mockConsumerDestination;
 
     @Mock
-    private ProducerProperties mockProducerProperties;
+    private ArtemisExtendedBindingProperties mockBindingProperties;
 
     @Mock
-    private ConsumerProperties mockConsumerProperties;
+    private ExtendedProducerProperties<ArtemisProducerProperties> mockProducerProperties;
+
+    @Mock
+    private ExtendedConsumerProperties<ArtemisConsumerProperties> mockConsumerProperties;
 
     private ArtemisMessageChannelBinder binder;
 
@@ -67,7 +73,8 @@ public class ArtemisMessageChannelBinderTest {
         MockitoAnnotations.initMocks(this);
         when(mockConnectionFactory.createContext()).thenReturn(mockJmsContext);
         when(mockJmsContext.createTopic(eq(address))).thenReturn(mockTopic);
-        binder = new ArtemisMessageChannelBinder(mockProvisioningProvider, mockConnectionFactory, mockMessageConverter);
+        binder = new ArtemisMessageChannelBinder(mockProvisioningProvider, mockConnectionFactory, mockMessageConverter,
+                mockBindingProperties);
     }
 
     @Test

@@ -19,7 +19,10 @@ package org.jboss.snowdrop.stream.binder.artemis.provisioning;
 import org.apache.activemq.artemis.api.core.client.ClientSession;
 import org.apache.activemq.artemis.api.core.client.ClientSessionFactory;
 import org.apache.activemq.artemis.api.core.client.ServerLocator;
-import org.springframework.cloud.stream.binder.ConsumerProperties;
+import org.jboss.snowdrop.stream.binder.artemis.properties.ArtemisConsumerProperties;
+import org.jboss.snowdrop.stream.binder.artemis.properties.ArtemisProducerProperties;
+import org.springframework.cloud.stream.binder.ExtendedConsumerProperties;
+import org.springframework.cloud.stream.binder.ExtendedProducerProperties;
 import org.springframework.cloud.stream.binder.ProducerProperties;
 import org.springframework.cloud.stream.provisioning.ConsumerDestination;
 import org.springframework.cloud.stream.provisioning.ProducerDestination;
@@ -37,7 +40,9 @@ import static org.apache.activemq.artemis.api.core.SimpleString.toSimpleString;
 /**
  * @author <a href="mailto:gytis@redhat.com">Gytis Trikleris</a>
  */
-public class ArtemisProvisioningProvider implements ProvisioningProvider<ConsumerProperties, ProducerProperties> {
+public class ArtemisProvisioningProvider implements
+        ProvisioningProvider<ExtendedConsumerProperties<ArtemisConsumerProperties>,
+                ExtendedProducerProperties<ArtemisProducerProperties>> {
 
     private final ServerLocator serverLocator;
 
@@ -54,8 +59,8 @@ public class ArtemisProvisioningProvider implements ProvisioningProvider<Consume
      * @throws ProvisioningException
      */
     @Override
-    public ProducerDestination provisionProducerDestination(String address, ProducerProperties properties)
-            throws ProvisioningException {
+    public ProducerDestination provisionProducerDestination(String address,
+            ExtendedProducerProperties<ArtemisProducerProperties> properties) throws ProvisioningException {
         if (properties.isPartitioned()) {
             return provisionPartitionedDestination(address, properties);
         }
@@ -64,8 +69,8 @@ public class ArtemisProvisioningProvider implements ProvisioningProvider<Consume
     }
 
     @Override
-    public ConsumerDestination provisionConsumerDestination(String address, String group, ConsumerProperties properties)
-            throws ProvisioningException {
+    public ConsumerDestination provisionConsumerDestination(String address, String group,
+            ExtendedConsumerProperties<ArtemisConsumerProperties> properties) throws ProvisioningException {
         ArtemisConsumerDestination destination;
 
         if (properties.isPartitioned()) {

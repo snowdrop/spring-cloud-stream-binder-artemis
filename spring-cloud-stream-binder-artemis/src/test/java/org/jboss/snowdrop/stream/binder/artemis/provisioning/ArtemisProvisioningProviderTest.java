@@ -6,13 +6,15 @@ import org.apache.activemq.artemis.api.core.SimpleString;
 import org.apache.activemq.artemis.api.core.client.ClientSession;
 import org.apache.activemq.artemis.api.core.client.ClientSessionFactory;
 import org.apache.activemq.artemis.api.core.client.ServerLocator;
+import org.jboss.snowdrop.stream.binder.artemis.properties.ArtemisConsumerProperties;
+import org.jboss.snowdrop.stream.binder.artemis.properties.ArtemisProducerProperties;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.springframework.cloud.stream.binder.ConsumerProperties;
-import org.springframework.cloud.stream.binder.ProducerProperties;
+import org.springframework.cloud.stream.binder.ExtendedConsumerProperties;
+import org.springframework.cloud.stream.binder.ExtendedProducerProperties;
 import org.springframework.cloud.stream.provisioning.ConsumerDestination;
 import org.springframework.cloud.stream.provisioning.ProducerDestination;
 import org.springframework.cloud.stream.provisioning.ProvisioningException;
@@ -47,10 +49,10 @@ public class ArtemisProvisioningProviderTest {
     private ClientSession mockClientSession;
 
     @Mock
-    private ProducerProperties mockProducerProperties;
+    private ExtendedProducerProperties<ArtemisProducerProperties> mockProducerProperties;
 
     @Mock
-    private ConsumerProperties mockConsumerProperties;
+    private ExtendedConsumerProperties<ArtemisConsumerProperties> mockConsumerProperties;
 
     private ArtemisProvisioningProvider provider;
 
