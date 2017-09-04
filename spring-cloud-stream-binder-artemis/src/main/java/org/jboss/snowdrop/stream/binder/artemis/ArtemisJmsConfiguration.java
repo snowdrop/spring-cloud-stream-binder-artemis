@@ -30,7 +30,7 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.cloud.stream.provisioning.ProvisioningProvider;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.jms.core.JmsTemplate;
+import org.springframework.jms.support.converter.MessagingMessageConverter;
 import org.springframework.util.StringUtils;
 
 import javax.jms.ConnectionFactory;
@@ -50,11 +50,17 @@ public class ArtemisJmsConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
+    MessagingMessageConverter messagingMessageConverter() {
+        return new MessagingMessageConverter();
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
     ArtemisMessageChannelBinder artemisMessageChannelBinder(ArtemisProvisioningProvider provisioningProvider,
-            ConnectionFactory connectionFactory, JmsTemplate jmsTemplate,
+            ConnectionFactory connectionFactory, MessagingMessageConverter messagingMessageConverter,
             ArtemisExtendedBindingProperties bindingProperties) {
-        return new ArtemisMessageChannelBinder(provisioningProvider, connectionFactory,
-                jmsTemplate.getMessageConverter(), bindingProperties);
+        return new ArtemisMessageChannelBinder(provisioningProvider, connectionFactory, messagingMessageConverter,
+                bindingProperties);
     }
 
     @Bean

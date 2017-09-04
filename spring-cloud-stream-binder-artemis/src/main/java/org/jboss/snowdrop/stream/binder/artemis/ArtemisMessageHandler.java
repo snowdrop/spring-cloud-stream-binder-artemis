@@ -54,7 +54,7 @@ public class ArtemisMessageHandler extends AbstractMessageHandler implements Lif
         try (Connection connection = connectionFactory.createConnection();
              Session session = connection.createSession()) {
             Topic topic = session.createTopic(address);
-            Message jmsMessage = messageConverter.toMessage(message.getPayload(), session);
+            Message jmsMessage = messageConverter.toMessage(message, session);
             MessageProducer producer = session.createProducer(topic);
             producer.send(jmsMessage);
         }

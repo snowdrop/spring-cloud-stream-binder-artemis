@@ -49,13 +49,6 @@ public class ArtemisBinderIT extends
     @Test
     @Ignore
     @Override
-    public void testSendAndReceive() {
-
-    }
-
-    @Test
-    @Ignore
-    @Override
     public void testSendAndReceiveNoOriginalContentType() {
 
     }
