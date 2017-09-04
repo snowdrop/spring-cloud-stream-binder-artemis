@@ -16,26 +16,17 @@
 
 package org.jboss.snowdrop.stream.binder.artemis.integration;
 
-import org.springframework.cloud.stream.annotation.EnableBinding;
-import org.springframework.cloud.stream.annotation.StreamListener;
-import org.springframework.cloud.stream.messaging.Processor;
-import org.springframework.messaging.handler.annotation.SendTo;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 /**
  * @author <a href="mailto:gytis@redhat.com">Gytis Trikleris</a>
  */
-@EnableBinding(Processor.class)
-public class TestProcessor {
+@SpringBootApplication
+public class StreamApplication {
 
-    @StreamListener(Processor.INPUT)
-    @SendTo(Processor.OUTPUT)
-    public String receive(String message) {
-        System.out.println("******************");
-        System.out.println("At the processor");
-        System.out.println("******************");
-        System.out.println("Received value: " + message);
-        System.out.println("Transforming the value to: " + message.toUpperCase());
-        return message.toUpperCase();
+    public static void main(String[] args) {
+        SpringApplication.run(StreamApplication.class, args);
     }
 
 }

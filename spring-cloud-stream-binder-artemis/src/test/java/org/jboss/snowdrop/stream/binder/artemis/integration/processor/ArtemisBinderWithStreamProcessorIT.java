@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.jboss.snowdrop.stream.binder.artemis.integration;
+package org.jboss.snowdrop.stream.binder.artemis.integration.processor;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -36,8 +36,14 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author <a href="mailto:gytis@redhat.com">Gytis Trikleris</a>
  */
 @RunWith(SpringRunner.class)
-@SpringBootTest
-public class ArtemisBinderIT {
+@SpringBootTest(
+        properties = {
+                "spring.cloud.stream.bindings.input.destination=testIn",
+                "spring.cloud.stream.bindings.input.group=streamApplication",
+                "spring.cloud.stream.bindings.output.destination=testOut"
+        }
+)
+public class ArtemisBinderWithStreamProcessorIT {
 
     @Autowired
     private ConnectionFactory connectionFactory;
@@ -61,7 +67,7 @@ public class ArtemisBinderIT {
 
             producer.send(inputTopic, originalMessage);
 
-            String receivedMessage = new String(consumer.receiveBody(byte[].class, 5000));
+            String receivedMessage = consumer.receiveBody(String.class, 5000);
             assertThat(receivedMessage).isEqualTo(originalMessage.toUpperCase());
         }
     }
