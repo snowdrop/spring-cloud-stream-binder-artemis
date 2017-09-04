@@ -36,6 +36,8 @@ import java.util.stream.IntStream;
 
 import static org.apache.activemq.artemis.api.core.RoutingType.MULTICAST;
 import static org.apache.activemq.artemis.api.core.SimpleString.toSimpleString;
+import static org.jboss.snowdrop.stream.binder.artemis.common.NamingUtils.getPartitionAddress;
+import static org.jboss.snowdrop.stream.binder.artemis.common.NamingUtils.getQueueName;
 
 /**
  * @author <a href="mailto:gytis@redhat.com">Gytis Trikleris</a>
@@ -52,6 +54,12 @@ public class ArtemisProvisioningProvider implements
 
     /**
      * Provision all addresses and queues required for the producer.
+     * If destination is unpartitioned, Artemis address is created with a value provided in an address argument. For
+     * the partitioned destination, Artemis address is created for each partition using the following naming scheme:
+     * {address}-{partitionIndex}.
+     * <p>
+     * For each address - required group pair shared queue is created using the following naming scheme:
+     * {address}[-partitionIndex]-{groupName}
      *
      * @param address    Artemis address to route messages to.
      * @param properties Producer specific properties.
@@ -68,20 +76,32 @@ public class ArtemisProvisioningProvider implements
         return provisionUnpartitionedDestination(address, properties);
     }
 
+    /**
+     * Provision address and queue required for the consumer.
+     * If destination is unpartitioned, Artemis address is created with a value provided in an address argument. If
+     * destiantion is patitioned, Artemis address is created using the following naming scheme:
+     * {address}-{instanceIndex}.
+     * Queue for the group is created using the following naming scheme: {address}[-instanceIndex]-{group}
+     *
+     * @param address
+     * @param group
+     * @param properties
+     * @return
+     * @throws ProvisioningException
+     */
     @Override
     public ConsumerDestination provisionConsumerDestination(String address, String group,
             ExtendedConsumerProperties<ArtemisConsumerProperties> properties) throws ProvisioningException {
         ArtemisConsumerDestination destination;
 
         if (properties.isPartitioned()) {
-            destination =
-                    new ArtemisConsumerDestination(String.format("%s-%d", address, properties.getInstanceIndex()));
+            destination = new ArtemisConsumerDestination(getPartitionAddress(address, properties.getInstanceIndex()));
         } else {
             destination = new ArtemisConsumerDestination(address);
         }
 
         createAddress(destination.getName());
-        createQueue(destination.getName(), group);
+        createQueue(destination.getName(), getQueueName(destination.getName(), group));
 
         return destination;
     }
@@ -98,7 +118,7 @@ public class ArtemisProvisioningProvider implements
     private ArtemisPartitionedProducerDestination provisionPartitionedDestination(String address,
             ProducerProperties properties) {
         List<String> addresses = IntStream.range(0, properties.getPartitionCount())
-                .mapToObj(i -> String.format("%s-%d", address, i))
+                .mapToObj(i -> getPartitionAddress(address, i))
                 .peek(this::createAddress)
                 .peek(partitionAddress -> provisionGroups(partitionAddress, properties.getRequiredGroups()))
                 .collect(Collectors.toList());
@@ -107,7 +127,8 @@ public class ArtemisProvisioningProvider implements
 
     private void provisionGroups(String address, String[] groups) {
         Arrays.stream(groups)
-                .forEach(group -> createQueue(address, group));
+                .map(group -> getQueueName(address, group))
+                .forEach(queueName -> createQueue(address, queueName));
     }
 
     private void createAddress(String name) {

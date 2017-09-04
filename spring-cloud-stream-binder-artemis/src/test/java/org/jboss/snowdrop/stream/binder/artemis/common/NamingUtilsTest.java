@@ -11,14 +11,12 @@ public class NamingUtilsTest {
 
     @Test
     public void shouldGetPartitionAddress() {
-        NamingUtils namingUtils = new NamingUtils();
-        assertThat(namingUtils.getPartitionAddress("testAddress", 0)).isEqualTo("testAddress-0");
+        assertThat(NamingUtils.getPartitionAddress("testAddress", 0)).isEqualTo("testAddress-0");
     }
 
     @Test
     public void shouldGetGroupName() {
-        NamingUtils namingUtils = new NamingUtils();
-        assertThat(namingUtils.getQueueName("testAddress", "testGroup")).isEqualTo("testAddress-testGroup");
+        assertThat(NamingUtils.getQueueName("testAddress", "testGroup")).isEqualTo("testAddress-testGroup");
     }
 
 }

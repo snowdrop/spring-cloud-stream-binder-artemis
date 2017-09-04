@@ -19,13 +19,13 @@ package org.jboss.snowdrop.stream.binder.artemis.common;
 /**
  * @author <a href="mailto:gytis@redhat.com">Gytis Trikleris</a>
  */
-public class NamingUtils {
+public final class NamingUtils {
 
-    public String getPartitionAddress(String address, int partition) {
+    public static String getPartitionAddress(String address, int partition) {
         return String.format("%s-%d", address, partition);
     }
 
-    public String getQueueName(String address, String group) {
+    public static String getQueueName(String address, String group) {
         return String.format("%s-%s", address, group);
     }
 

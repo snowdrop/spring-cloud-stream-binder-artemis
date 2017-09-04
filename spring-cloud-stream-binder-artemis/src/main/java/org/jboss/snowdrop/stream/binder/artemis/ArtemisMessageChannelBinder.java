@@ -37,7 +37,10 @@ import org.springframework.messaging.MessageHandler;
 
 import javax.jms.ConnectionFactory;
 import javax.jms.JMSContext;
+import javax.jms.JMSException;
 import javax.jms.Topic;
+
+import static org.jboss.snowdrop.stream.binder.artemis.common.NamingUtils.getQueueName;
 
 /**
  * @author <a href="mailto:gytis@redhat.com">Gytis Trikleris</a>
@@ -88,10 +91,11 @@ public class ArtemisMessageChannelBinder extends
     }
 
     // TODO extract
-    private AbstractMessageListenerContainer getMessageListenerContainer(Topic topic, String group) {
+    private AbstractMessageListenerContainer getMessageListenerContainer(Topic topic, String group)
+            throws JMSException {
         DefaultMessageListenerContainer listenerContainer = new DefaultMessageListenerContainer();
         listenerContainer.setDestination(topic);
-        listenerContainer.setSubscriptionName(group);
+        listenerContainer.setSubscriptionName(getQueueName(topic.getTopicName(), group));
         listenerContainer.setPubSubDomain(true);
         listenerContainer.setConnectionFactory(connectionFactory);
         listenerContainer.setSessionTransacted(true);
