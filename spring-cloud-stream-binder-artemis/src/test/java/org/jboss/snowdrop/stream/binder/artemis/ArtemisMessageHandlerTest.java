@@ -19,6 +19,7 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.stream.Stream;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -169,6 +170,15 @@ public class ArtemisMessageHandlerTest {
     @Ignore
     public void shouldHandleStreamMessageWithHeaders() {
 
+    }
+
+    @Test
+    public void shouldStartAndStop() {
+        assertThat(handler.isRunning()).isFalse();
+        handler.start();
+        assertThat(handler.isRunning()).isTrue();
+        handler.stop();
+        assertThat(handler.isRunning()).isFalse();
     }
 
 }

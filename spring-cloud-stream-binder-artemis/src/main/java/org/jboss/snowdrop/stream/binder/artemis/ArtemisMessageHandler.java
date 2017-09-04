@@ -16,6 +16,7 @@
 
 package org.jboss.snowdrop.stream.binder.artemis;
 
+import org.springframework.context.Lifecycle;
 import org.springframework.integration.handler.AbstractMessageHandler;
 import org.springframework.jms.support.converter.MessageConverter;
 
@@ -30,13 +31,15 @@ import java.util.Objects;
 /**
  * @author <a href="mailto:gytis@redhat.com">Gytis Trikleris</a>
  */
-public class ArtemisMessageHandler extends AbstractMessageHandler {
+public class ArtemisMessageHandler extends AbstractMessageHandler implements Lifecycle {
 
     private final String address;
 
     private final ConnectionFactory connectionFactory;
 
     private final MessageConverter messageConverter;
+
+    private boolean isRunning = false;
 
     public ArtemisMessageHandler(String address, ConnectionFactory connectionFactory,
             MessageConverter messageConverter) {
@@ -57,4 +60,18 @@ public class ArtemisMessageHandler extends AbstractMessageHandler {
         }
     }
 
+    @Override
+    public void start() {
+        isRunning = true;
+    }
+
+    @Override
+    public void stop() {
+        isRunning = false;
+    }
+
+    @Override
+    public boolean isRunning() {
+        return isRunning;
+    }
 }
