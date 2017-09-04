@@ -115,7 +115,7 @@ public class ArtemisProvisioningProvider implements
              ClientSession session = sessionFactory.createSession()) {
             session.createAddress(toSimpleString(name), MULTICAST, true);
         } catch (Exception e) {
-            throw new ProvisioningException(String.format("Failed to create address '%s'", name));
+            throw new ProvisioningException(String.format("Failed to create address '%s'", name), e);
         }
     }
 
@@ -125,7 +125,7 @@ public class ArtemisProvisioningProvider implements
             session.createSharedQueue(toSimpleString(address), MULTICAST, toSimpleString(name), true);
         } catch (Exception e) {
             throw new ProvisioningException(
-                    String.format("Failed to create queue '%s' with address '%s'", name, address));
+                    String.format("Failed to create queue '%s' with address '%s'", name, address), e);
         }
     }
 
