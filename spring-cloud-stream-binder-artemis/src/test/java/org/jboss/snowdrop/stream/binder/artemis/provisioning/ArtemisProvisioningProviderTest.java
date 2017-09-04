@@ -148,7 +148,7 @@ public class ArtemisProvisioningProviderTest {
             provider.provisionProducerDestination(address, mockProducerProperties);
             fail("Exception was expected");
         } catch (ProvisioningException e) {
-            assertThat(e.getMessage()).isEqualTo(String.format("Failed to create address '%s'", address));
+            assertThat(e.getMessage()).contains(String.format("Failed to create address '%s'", address));
         }
     }
 
@@ -161,7 +161,7 @@ public class ArtemisProvisioningProviderTest {
             provider.provisionProducerDestination(address, mockProducerProperties);
             fail("Exception was expected");
         } catch (ProvisioningException e) {
-            assertThat(e.getMessage()).isEqualTo(
+            assertThat(e.getMessage()).contains(
                     String.format("Failed to create queue '%s' with address '%s'", groups[0], address));
         }
     }
@@ -211,7 +211,7 @@ public class ArtemisProvisioningProviderTest {
             provider.provisionConsumerDestination(address, groups[0], mockConsumerProperties);
             fail("Exception was expected");
         } catch (ProvisioningException e) {
-            assertThat(e.getMessage()).isEqualTo(String.format("Failed to create address '%s'", address));
+            assertThat(e.getMessage()).contains(String.format("Failed to create address '%s'", address));
         }
     }
 
@@ -223,7 +223,7 @@ public class ArtemisProvisioningProviderTest {
             provider.provisionConsumerDestination(address, groups[0], mockConsumerProperties);
             fail("Exception was expected");
         } catch (ProvisioningException e) {
-            assertThat(e.getMessage()).isEqualTo(
+            assertThat(e.getMessage()).contains(
                     String.format("Failed to create queue '%s' with address '%s'", groups[0], address));
         }
     }
