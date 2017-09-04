@@ -14,15 +14,18 @@
  * limitations under the License.
  */
 
-package org.jboss.snowdrop.stream.binder.artemis.integration;
+package org.jboss.snowdrop.stream.binder.artemis.integration.generic;
 
+import org.jboss.snowdrop.stream.binder.artemis.ArtemisJmsConfiguration;
 import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 /**
  * @author <a href="mailto:gytis@redhat.com">Gytis Trikleris</a>
  */
 @SpringBootApplication
+@ImportAutoConfiguration(ArtemisJmsConfiguration.class)
 public class StreamApplication {
 
     public static void main(String[] args) {
