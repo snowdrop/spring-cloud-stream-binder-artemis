@@ -16,17 +16,42 @@
 
 package org.jboss.snowdrop.stream.binder.artemis.common;
 
+import org.springframework.util.Base64Utils;
+
+import java.nio.ByteBuffer;
+import java.util.Objects;
+import java.util.UUID;
+
 /**
  * @author <a href="mailto:gytis@redhat.com">Gytis Trikleris</a>
  */
 public final class NamingUtils {
 
     public static String getPartitionAddress(String address, int partition) {
+        Objects.requireNonNull(address);
+
         return String.format("%s-%d", address, partition);
     }
 
     public static String getQueueName(String address, String group) {
+        Objects.requireNonNull(address);
+        Objects.requireNonNull(group);
+
         return String.format("%s-%s", address, group);
+    }
+
+    public static String getAnonymousQueueName(String address) {
+        Objects.requireNonNull(address);
+
+        UUID uuid = UUID.randomUUID();
+        ByteBuffer buffer = ByteBuffer.wrap(new byte[16]);
+        buffer.putLong(uuid.getMostSignificantBits())
+                .putLong(uuid.getLeastSignificantBits());
+        String suffix = Base64Utils.encodeToUrlSafeString(buffer.array())
+                .replaceAll("=", "")
+                .replaceAll("-", "\\$");
+
+        return String.format("%s-%s", address, suffix);
     }
 
 }

@@ -77,11 +77,10 @@ public class ArtemisProvisioningProvider implements
     }
 
     /**
-     * Provision address and queue required for the consumer.
+     * Provision address required for the consumer. Queue will be created later when registering consumer listener.
      * If destination is unpartitioned, Artemis address is created with a value provided in an address argument. If
-     * destiantion is patitioned, Artemis address is created using the following naming scheme:
+     * destination is partitioned, Artemis address is created using the following naming scheme:
      * {address}-{instanceIndex}.
-     * Queue for the group is created using the following naming scheme: {address}[-instanceIndex]-{group}
      *
      * @param address
      * @param group
@@ -101,7 +100,6 @@ public class ArtemisProvisioningProvider implements
         }
 
         createAddress(destination.getName());
-        createQueue(destination.getName(), getQueueName(destination.getName(), group));
 
         return destination;
     }

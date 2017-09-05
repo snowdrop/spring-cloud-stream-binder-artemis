@@ -20,12 +20,14 @@ import org.apache.activemq.artemis.api.core.client.ServerLocator;
 import org.jboss.snowdrop.stream.binder.artemis.ArtemisMessageChannelBinder;
 import org.jboss.snowdrop.stream.binder.artemis.properties.ArtemisConsumerProperties;
 import org.jboss.snowdrop.stream.binder.artemis.properties.ArtemisProducerProperties;
+import org.junit.Ignore;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.cloud.stream.binder.AbstractBinderTests;
 import org.springframework.cloud.stream.binder.ExtendedConsumerProperties;
 import org.springframework.cloud.stream.binder.ExtendedProducerProperties;
+import org.springframework.cloud.stream.binder.PartitionCapableBinderTests;
 import org.springframework.cloud.stream.binder.Spy;
 import org.springframework.test.context.junit4.SpringRunner;
 
@@ -35,7 +37,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 @RunWith(SpringRunner.class)
 @SpringBootTest
 public class ArtemisBinderIT extends
-        AbstractBinderTests<ArtemisTestBinder, ExtendedConsumerProperties<ArtemisConsumerProperties>,
+        PartitionCapableBinderTests<ArtemisTestBinder, ExtendedConsumerProperties<ArtemisConsumerProperties>,
                 ExtendedProducerProperties<ArtemisProducerProperties>> {
 
     @Autowired
@@ -43,6 +45,20 @@ public class ArtemisBinderIT extends
 
     @Autowired
     private ServerLocator serverLocator;
+
+    @Test
+    @Ignore
+    @Override
+    public void testPartitionedModuleJava() {
+
+    }
+
+    @Test
+    @Ignore
+    @Override
+    public void testPartitionedModuleSpEL() {
+
+    }
 
     @Override
     public Spy spyOn(String name) {
@@ -70,4 +86,13 @@ public class ArtemisBinderIT extends
         return properties;
     }
 
+    @Override
+    protected boolean usesExplicitRouting() {
+        return true;
+    }
+
+    @Override
+    protected String getClassUnderTestName() {
+        return ArtemisMessageChannelBinder.class.getSimpleName();
+    }
 }

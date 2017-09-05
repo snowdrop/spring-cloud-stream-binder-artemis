@@ -19,6 +19,7 @@ package org.jboss.snowdrop.stream.binder.artemis;
 import org.apache.activemq.artemis.api.core.TransportConfiguration;
 import org.apache.activemq.artemis.api.core.client.ActiveMQClient;
 import org.apache.activemq.artemis.api.core.client.ServerLocator;
+import org.jboss.snowdrop.stream.binder.artemis.handlers.ListenerContainerFactory;
 import org.jboss.snowdrop.stream.binder.artemis.properties.ArtemisBinderConfigurationProperties;
 import org.jboss.snowdrop.stream.binder.artemis.properties.ArtemisExtendedBindingProperties;
 import org.jboss.snowdrop.stream.binder.artemis.provisioning.ArtemisProvisioningProvider;
@@ -50,6 +51,12 @@ public class ArtemisJmsConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
+    ListenerContainerFactory listenerContainerFactory(ConnectionFactory connectionFactory) {
+        return new ListenerContainerFactory(connectionFactory);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
     MessagingMessageConverter messagingMessageConverter() {
         return new MessagingMessageConverter();
     }
@@ -57,10 +64,10 @@ public class ArtemisJmsConfiguration {
     @Bean
     @ConditionalOnMissingBean
     ArtemisMessageChannelBinder artemisMessageChannelBinder(ArtemisProvisioningProvider provisioningProvider,
-            ConnectionFactory connectionFactory, MessagingMessageConverter messagingMessageConverter,
-            ArtemisExtendedBindingProperties bindingProperties) {
-        return new ArtemisMessageChannelBinder(provisioningProvider, connectionFactory, messagingMessageConverter,
-                bindingProperties);
+            ConnectionFactory connectionFactory, ListenerContainerFactory listenerContainerFactory,
+            MessagingMessageConverter messagingMessageConverter, ArtemisExtendedBindingProperties bindingProperties) {
+        return new ArtemisMessageChannelBinder(provisioningProvider, connectionFactory, listenerContainerFactory,
+                messagingMessageConverter, bindingProperties);
     }
 
     @Bean

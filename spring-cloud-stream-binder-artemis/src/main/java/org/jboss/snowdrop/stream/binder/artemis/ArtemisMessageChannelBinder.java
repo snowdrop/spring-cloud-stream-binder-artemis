@@ -16,6 +16,7 @@
 
 package org.jboss.snowdrop.stream.binder.artemis;
 
+import org.jboss.snowdrop.stream.binder.artemis.handlers.ListenerContainerFactory;
 import org.jboss.snowdrop.stream.binder.artemis.properties.ArtemisConsumerProperties;
 import org.jboss.snowdrop.stream.binder.artemis.properties.ArtemisExtendedBindingProperties;
 import org.jboss.snowdrop.stream.binder.artemis.properties.ArtemisProducerProperties;
@@ -30,16 +31,16 @@ import org.springframework.integration.core.MessageProducer;
 import org.springframework.integration.dsl.jms.JmsMessageDrivenChannelAdapter;
 import org.springframework.integration.jms.ChannelPublishingJmsMessageListener;
 import org.springframework.jms.listener.AbstractMessageListenerContainer;
-import org.springframework.jms.listener.DefaultMessageListenerContainer;
 import org.springframework.jms.support.converter.MessageConverter;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.MessageHandler;
+import org.springframework.util.StringUtils;
 
 import javax.jms.ConnectionFactory;
 import javax.jms.JMSContext;
-import javax.jms.JMSException;
 import javax.jms.Topic;
 
+import static org.jboss.snowdrop.stream.binder.artemis.common.NamingUtils.getAnonymousQueueName;
 import static org.jboss.snowdrop.stream.binder.artemis.common.NamingUtils.getQueueName;
 
 /**
@@ -54,15 +55,18 @@ public class ArtemisMessageChannelBinder extends
 
     private final ConnectionFactory connectionFactory;
 
+    private final ListenerContainerFactory listenerContainerFactory;
+
     private final MessageConverter messageConverter;
 
     private final ArtemisExtendedBindingProperties bindingProperties;
 
     public ArtemisMessageChannelBinder(ArtemisProvisioningProvider provisioningProvider,
-            ConnectionFactory connectionFactory, MessageConverter messageConverter,
-            ArtemisExtendedBindingProperties bindingProperties) {
+            ConnectionFactory connectionFactory, ListenerContainerFactory listenerContainerFactory,
+            MessageConverter messageConverter, ArtemisExtendedBindingProperties bindingProperties) {
         super(true, DEFAULT_HEADERS, provisioningProvider);
         this.connectionFactory = connectionFactory;
+        this.listenerContainerFactory = listenerContainerFactory;
         this.messageConverter = messageConverter;
         this.bindingProperties = bindingProperties;
     }
@@ -81,27 +85,14 @@ public class ArtemisMessageChannelBinder extends
     @Override
     protected MessageProducer createConsumerEndpoint(ConsumerDestination destination, String group,
             ExtendedConsumerProperties<ArtemisConsumerProperties> properties) throws Exception {
+        String subscriptionName = getSubscriptionName(destination.getName(), group);
+
         try (JMSContext context = connectionFactory.createContext()) {
             Topic topic = context.createTopic(destination.getName());
-
-            AbstractMessageListenerContainer messageListenerContainer = getMessageListenerContainer(topic, group);
-            return new JmsMessageDrivenChannelAdapter(messageListenerContainer,
-                    new ChannelPublishingJmsMessageListener());
+            AbstractMessageListenerContainer listenerContainer =
+                    listenerContainerFactory.getListenerContainer(topic, subscriptionName);
+            return new JmsMessageDrivenChannelAdapter(listenerContainer, new ChannelPublishingJmsMessageListener());
         }
-    }
-
-    // TODO extract
-    private AbstractMessageListenerContainer getMessageListenerContainer(Topic topic, String group)
-            throws JMSException {
-        DefaultMessageListenerContainer listenerContainer = new DefaultMessageListenerContainer();
-        listenerContainer.setDestination(topic);
-        listenerContainer.setSubscriptionName(getQueueName(topic.getTopicName(), group));
-        listenerContainer.setPubSubDomain(true);
-        listenerContainer.setConnectionFactory(connectionFactory);
-        listenerContainer.setSessionTransacted(true);
-        listenerContainer.setSubscriptionDurable(true);
-        listenerContainer.setSubscriptionShared(true);
-        return listenerContainer;
     }
 
     @Override
@@ -112,5 +103,13 @@ public class ArtemisMessageChannelBinder extends
     @Override
     public ArtemisProducerProperties getExtendedProducerProperties(String channelName) {
         return bindingProperties.getExtendedProducerProperties(channelName);
+    }
+
+    private String getSubscriptionName(String address, String group) {
+        if (StringUtils.hasText(group)) {
+            return getQueueName(address, group);
+        } else {
+            return getAnonymousQueueName(address);
+        }
     }
 }

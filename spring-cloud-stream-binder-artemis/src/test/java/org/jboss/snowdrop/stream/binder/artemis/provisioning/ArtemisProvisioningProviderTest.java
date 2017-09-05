@@ -9,7 +9,6 @@ import org.apache.activemq.artemis.api.core.client.ServerLocator;
 import org.jboss.snowdrop.stream.binder.artemis.properties.ArtemisConsumerProperties;
 import org.jboss.snowdrop.stream.binder.artemis.properties.ArtemisProducerProperties;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -172,20 +171,12 @@ public class ArtemisProvisioningProviderTest {
     @Test
     public void shouldProvisionUnpartitionedConsumer() throws ActiveMQException {
         ConsumerDestination destination =
-                provider.provisionConsumerDestination(address, groups[0], mockConsumerProperties);
+                provider.provisionConsumerDestination(address, null, mockConsumerProperties);
 
         assertThat(destination).isInstanceOf(ArtemisConsumerDestination.class);
         assertThat(destination.getName()).isEqualTo(address);
 
         verify(mockClientSession, times(1)).createAddress(toSimpleString(address), MULTICAST, true);
-        verify(mockClientSession, times(1)).createSharedQueue(toSimpleString(address), MULTICAST,
-                toSimpleString(getQueueName(address, groups[0])), true);
-    }
-
-    @Test
-    @Ignore
-    public void shouldProvisionUnpartitionedConsumerWithAnonymousGroup() {
-
     }
 
     @Test
@@ -196,14 +187,12 @@ public class ArtemisProvisioningProviderTest {
         when(mockConsumerProperties.getInstanceIndex()).thenReturn(0);
 
         ConsumerDestination destination =
-                provider.provisionConsumerDestination(address, groups[0], mockConsumerProperties);
+                provider.provisionConsumerDestination(address, null, mockConsumerProperties);
 
         assertThat(destination).isInstanceOf(ArtemisConsumerDestination.class);
         assertThat(destination.getName()).isEqualTo(partitionedAddress);
 
         verify(mockClientSession, times(1)).createAddress(toSimpleString(partitionedAddress), MULTICAST, true);
-        verify(mockClientSession, times(1)).createSharedQueue(toSimpleString(partitionedAddress), MULTICAST,
-                toSimpleString(getQueueName(partitionedAddress, groups[0])), true);
     }
 
     @Test
@@ -215,20 +204,6 @@ public class ArtemisProvisioningProviderTest {
             fail("Exception was expected");
         } catch (ProvisioningException e) {
             assertThat(e.getMessage()).contains(String.format("Failed to create address '%s'", address));
-        }
-    }
-
-    @Test
-    public void shouldFailToCreateQueueForConsumer() throws ActiveMQException {
-        doThrow(new ActiveMQException("Test exception")).when(mockClientSession)
-                .createSharedQueue(toSimpleString(address), MULTICAST, toSimpleString(getQueueName(address, groups[0])),
-                        true);
-        try {
-            provider.provisionConsumerDestination(address, groups[0], mockConsumerProperties);
-            fail("Exception was expected");
-        } catch (ProvisioningException e) {
-            assertThat(e.getMessage()).contains(
-                    String.format("Failed to create queue '%s-%s' with address '%s'", address, groups[0], address));
         }
     }
 
