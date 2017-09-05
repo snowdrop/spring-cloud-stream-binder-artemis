@@ -29,6 +29,8 @@ import org.springframework.cloud.stream.binder.ExtendedConsumerProperties;
 import org.springframework.cloud.stream.binder.ExtendedProducerProperties;
 import org.springframework.cloud.stream.binder.PartitionCapableBinderTests;
 import org.springframework.cloud.stream.binder.Spy;
+import org.springframework.messaging.Message;
+import org.springframework.messaging.PollableChannel;
 import org.springframework.test.context.junit4.SpringRunner;
 
 /**
@@ -46,8 +48,14 @@ public class ArtemisBinderIT extends
     @Autowired
     private ServerLocator serverLocator;
 
-    public ArtemisBinderIT() {
-        timeoutMultiplier = 20.0D; // Increasing timeout to avoid Travis CI failures
+    @Override
+    protected Message<?> receive(PollableChannel channel, int additionalMultiplier) {
+        try {
+            Thread.sleep((long) (1000 * timeoutMultiplier * additionalMultiplier));
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        return super.receive(channel, additionalMultiplier);
     }
 
     @Test
