@@ -52,6 +52,10 @@ public class ArtemisBinderIT extends
     @Autowired
     private ServerLocator serverLocator;
 
+    public ArtemisBinderIT() {
+        timeoutMultiplier = 10.0D;
+    }
+
     @Override
     protected Message<?> receive(PollableChannel channel, int additionalMultiplier) {
         return await().atMost((long) (additionalMultiplier * timeoutMultiplier), SECONDS)
