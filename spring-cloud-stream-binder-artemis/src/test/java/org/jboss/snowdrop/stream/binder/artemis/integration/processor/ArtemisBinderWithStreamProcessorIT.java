@@ -67,7 +67,8 @@ public class ArtemisBinderWithStreamProcessorIT {
 
             producer.send(inputTopic, originalMessage);
 
-            String receivedMessage = consumer.receiveBody(String.class, 5000);
+            // By default messages are sent to the broker as byte arrays. Consumer handlers do the conversion.
+            String receivedMessage = new String(consumer.receiveBody(byte[].class, 5000));
             assertThat(receivedMessage).isEqualTo(originalMessage.toUpperCase());
         }
     }

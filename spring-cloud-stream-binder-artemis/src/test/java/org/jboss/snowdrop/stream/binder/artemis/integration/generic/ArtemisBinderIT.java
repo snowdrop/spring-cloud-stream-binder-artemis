@@ -20,8 +20,6 @@ import org.apache.activemq.artemis.api.core.client.ServerLocator;
 import org.jboss.snowdrop.stream.binder.artemis.ArtemisMessageChannelBinder;
 import org.jboss.snowdrop.stream.binder.artemis.properties.ArtemisConsumerProperties;
 import org.jboss.snowdrop.stream.binder.artemis.properties.ArtemisProducerProperties;
-import org.junit.Ignore;
-import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -46,13 +44,6 @@ public class ArtemisBinderIT extends
     @Autowired
     private ServerLocator serverLocator;
 
-    @Test
-    @Ignore
-    @Override
-    public void testSendAndReceiveNoOriginalContentType() {
-
-    }
-
     @Override
     public Spy spyOn(String name) {
         return null;
@@ -76,7 +67,6 @@ public class ArtemisBinderIT extends
     protected ExtendedProducerProperties<ArtemisProducerProperties> createProducerProperties() {
         ExtendedProducerProperties<ArtemisProducerProperties> properties =
                 new ExtendedProducerProperties<>(new ArtemisProducerProperties());
-        properties.setUseNativeEncoding(true);
         return properties;
     }
 
