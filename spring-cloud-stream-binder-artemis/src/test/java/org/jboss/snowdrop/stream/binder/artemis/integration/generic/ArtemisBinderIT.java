@@ -46,6 +46,10 @@ public class ArtemisBinderIT extends
     @Autowired
     private ServerLocator serverLocator;
 
+    public ArtemisBinderIT() {
+        timeoutMultiplier = 3.0D; // Increasing timeout to avoid Travis CI failures
+    }
+
     @Test
     @Ignore
     @Override
