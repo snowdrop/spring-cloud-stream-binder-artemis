@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.jboss.snowdrop.stream.binder.artemis;
+package org.jboss.snowdrop.stream.binder.artemis.handlers;
 
 import org.springframework.context.Lifecycle;
 import org.springframework.integration.handler.AbstractMessageHandler;

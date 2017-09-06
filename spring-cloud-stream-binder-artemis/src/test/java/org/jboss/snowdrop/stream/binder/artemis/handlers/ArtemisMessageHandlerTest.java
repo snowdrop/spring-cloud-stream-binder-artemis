@@ -1,4 +1,4 @@
-package org.jboss.snowdrop.stream.binder.artemis;
+package org.jboss.snowdrop.stream.binder.artemis.handlers;
 
 import org.junit.Before;
 import org.junit.Test;

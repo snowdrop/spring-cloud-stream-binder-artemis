@@ -16,6 +16,7 @@
 
 package org.jboss.snowdrop.stream.binder.artemis;
 
+import org.jboss.snowdrop.stream.binder.artemis.handlers.ArtemisMessageHandler;
 import org.jboss.snowdrop.stream.binder.artemis.handlers.ListenerContainerFactory;
 import org.jboss.snowdrop.stream.binder.artemis.properties.ArtemisConsumerProperties;
 import org.jboss.snowdrop.stream.binder.artemis.properties.ArtemisExtendedBindingProperties;
