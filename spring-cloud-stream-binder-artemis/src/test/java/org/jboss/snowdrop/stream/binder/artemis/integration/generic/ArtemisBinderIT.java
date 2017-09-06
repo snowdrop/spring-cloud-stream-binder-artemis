@@ -33,10 +33,6 @@ import org.springframework.messaging.Message;
 import org.springframework.messaging.PollableChannel;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import static java.util.concurrent.TimeUnit.SECONDS;
-import static org.awaitility.Awaitility.await;
-import static org.hamcrest.CoreMatchers.notNullValue;
-
 /**
  * @author <a href="mailto:gytis@redhat.com">Gytis Trikleris</a>
  */
@@ -54,8 +50,12 @@ public class ArtemisBinderIT extends
 
     @Override
     protected Message<?> receive(PollableChannel channel, int additionalMultiplier) {
-        return await().atMost((long) (additionalMultiplier * timeoutMultiplier), SECONDS)
-                .until(channel::receive, notNullValue());
+        try {
+            Thread.sleep((long) (1000 * timeoutMultiplier * additionalMultiplier));
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        return super.receive(channel, additionalMultiplier);
     }
 
     @Test
