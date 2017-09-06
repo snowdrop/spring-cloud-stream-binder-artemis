@@ -28,9 +28,12 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.jms.JndiConnectionFactoryAutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.cloud.stream.config.codec.kryo.KryoCodecAutoConfiguration;
 import org.springframework.cloud.stream.provisioning.ProvisioningProvider;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
+import org.springframework.integration.codec.Codec;
 import org.springframework.jms.support.converter.MessagingMessageConverter;
 import org.springframework.util.StringUtils;
 
@@ -45,6 +48,7 @@ import java.util.Map;
 @AutoConfigureAfter(JndiConnectionFactoryAutoConfiguration.class)
 @ConditionalOnClass(ServerLocator.class)
 @EnableConfigurationProperties({ArtemisBinderConfigurationProperties.class, ArtemisExtendedBindingProperties.class})
+@Import(KryoCodecAutoConfiguration.class)
 public class ArtemisBinderAutoConfiguration {
 
     @Bean
@@ -63,9 +67,12 @@ public class ArtemisBinderAutoConfiguration {
     @ConditionalOnMissingBean
     ArtemisMessageChannelBinder artemisMessageChannelBinder(ArtemisProvisioningProvider provisioningProvider,
             ConnectionFactory connectionFactory, ListenerContainerFactory listenerContainerFactory,
-            MessagingMessageConverter messagingMessageConverter, ArtemisExtendedBindingProperties bindingProperties) {
-        return new ArtemisMessageChannelBinder(provisioningProvider, connectionFactory, listenerContainerFactory,
-                messagingMessageConverter, bindingProperties);
+            MessagingMessageConverter messagingMessageConverter, ArtemisExtendedBindingProperties bindingProperties,
+            Codec codec) {
+        ArtemisMessageChannelBinder binder = new ArtemisMessageChannelBinder(provisioningProvider, connectionFactory,
+                listenerContainerFactory, messagingMessageConverter, bindingProperties);
+        binder.setCodec(codec);
+        return binder;
     }
 
     @Bean

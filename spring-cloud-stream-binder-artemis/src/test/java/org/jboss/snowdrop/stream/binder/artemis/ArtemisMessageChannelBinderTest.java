@@ -93,21 +93,12 @@ public class ArtemisMessageChannelBinderTest {
     }
 
     @Test
-    public void shouldCreateUnpartitionedProducerMessageHandler() throws Exception {
+    public void shouldCreateProducerMessageHandler() throws Exception {
         when(mockProducerProperties.isPartitioned()).thenReturn(false);
 
         MessageHandler handler = binder.createProducerMessageHandler(mockProducerDestination, mockProducerProperties);
 
         assertThat(handler).isInstanceOf(ArtemisMessageHandler.class);
-
-        verify(mockProducerProperties, times(1)).isPartitioned();
-    }
-
-    @Test(expected = UnsupportedOperationException.class)
-    public void shouldCreatePartitionedProducerMessageHandler() throws Exception {
-        when(mockProducerProperties.isPartitioned()).thenReturn(true);
-
-        binder.createProducerMessageHandler(mockProducerDestination, mockProducerProperties);
     }
 
     @Test

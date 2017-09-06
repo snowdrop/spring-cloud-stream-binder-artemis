@@ -75,12 +75,7 @@ public class ArtemisMessageChannelBinder extends
     @Override
     protected MessageHandler createProducerMessageHandler(ProducerDestination destination,
             ExtendedProducerProperties<ArtemisProducerProperties> properties) throws Exception {
-        if (properties.isPartitioned()) {
-            // TODO
-            throw new UnsupportedOperationException();
-        } else {
-            return new ArtemisMessageHandler(destination.getName(), connectionFactory, messageConverter);
-        }
+        return new ArtemisMessageHandler(destination, connectionFactory, messageConverter);
     }
 
     @Override

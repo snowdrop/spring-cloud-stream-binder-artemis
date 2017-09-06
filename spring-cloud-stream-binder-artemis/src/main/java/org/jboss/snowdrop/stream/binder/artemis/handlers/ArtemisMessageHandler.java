@@ -16,6 +16,7 @@
 
 package org.jboss.snowdrop.stream.binder.artemis.handlers;
 
+import org.springframework.cloud.stream.provisioning.ProducerDestination;
 import org.springframework.context.Lifecycle;
 import org.springframework.integration.handler.AbstractMessageHandler;
 import org.springframework.jms.support.converter.MessageConverter;
@@ -28,12 +29,14 @@ import javax.jms.Session;
 import javax.jms.Topic;
 import java.util.Objects;
 
+import static org.springframework.cloud.stream.binder.BinderHeaders.PARTITION_HEADER;
+
 /**
  * @author <a href="mailto:gytis@redhat.com">Gytis Trikleris</a>
  */
 public class ArtemisMessageHandler extends AbstractMessageHandler implements Lifecycle {
 
-    private final String address;
+    private final ProducerDestination destination;
 
     private final ConnectionFactory connectionFactory;
 
@@ -41,9 +44,9 @@ public class ArtemisMessageHandler extends AbstractMessageHandler implements Lif
 
     private boolean isRunning = false;
 
-    public ArtemisMessageHandler(String address, ConnectionFactory connectionFactory,
+    public ArtemisMessageHandler(ProducerDestination destination, ConnectionFactory connectionFactory,
             MessageConverter messageConverter) {
-        this.address = address;
+        this.destination = destination;
         this.connectionFactory = connectionFactory;
         this.messageConverter = messageConverter;
     }
@@ -53,7 +56,7 @@ public class ArtemisMessageHandler extends AbstractMessageHandler implements Lif
         Objects.requireNonNull(message);
         try (Connection connection = connectionFactory.createConnection();
              Session session = connection.createSession()) {
-            Topic topic = session.createTopic(address);
+            Topic topic = session.createTopic(getAddress(message));
             Message jmsMessage = messageConverter.toMessage(message, session);
             MessageProducer producer = session.createProducer(topic);
             producer.send(jmsMessage);
@@ -73,5 +76,22 @@ public class ArtemisMessageHandler extends AbstractMessageHandler implements Lif
     @Override
     public boolean isRunning() {
         return isRunning;
+    }
+
+    private String getAddress(org.springframework.messaging.Message<?> message) {
+        Object partition = message.getHeaders()
+                .get(PARTITION_HEADER);
+
+        if (partition == null) {
+            return destination.getName();
+        }
+        if (partition instanceof Integer) {
+            return destination.getNameForPartition((Integer) partition);
+        }
+        if (partition instanceof String) {
+            return destination.getNameForPartition(Integer.valueOf((String) partition));
+        }
+        throw new IllegalArgumentException(
+                String.format("The provided partition '%s' is not a valid format", partition));
     }
 }
