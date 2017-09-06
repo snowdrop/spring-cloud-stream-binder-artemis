@@ -20,6 +20,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
@@ -37,12 +38,14 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 @RunWith(SpringRunner.class)
 @SpringBootTest(
+        classes = TestProcessor.class,
         properties = {
                 "spring.cloud.stream.bindings.input.destination=testIn",
                 "spring.cloud.stream.bindings.input.group=streamApplication",
                 "spring.cloud.stream.bindings.output.destination=testOut"
         }
 )
+@EnableAutoConfiguration
 public class ArtemisBinderWithStreamProcessorIT {
 
     @Autowired
