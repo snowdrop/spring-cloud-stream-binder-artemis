@@ -39,15 +39,13 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * TODO rename
- *
  * @author <a href="mailto:gytis@redhat.com">Gytis Trikleris</a>
  */
 @Configuration
 @AutoConfigureAfter(JndiConnectionFactoryAutoConfiguration.class)
 @ConditionalOnClass(ServerLocator.class)
 @EnableConfigurationProperties({ArtemisBinderConfigurationProperties.class, ArtemisExtendedBindingProperties.class})
-public class ArtemisJmsConfiguration {
+public class ArtemisBinderAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
