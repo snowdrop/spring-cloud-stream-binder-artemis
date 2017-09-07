@@ -1,2 +1,1 @@
-artemis:\
-org.jboss.snowdrop.stream.binder.artemis.ArtemisBinderAutoConfiguration
+artemis:me.snowdrop.stream.binder.artemis.ArtemisBinderAutoConfiguration

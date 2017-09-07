@@ -11,7 +11,7 @@
     <relativePath />
   </parent>
 
-  <groupId>org.jboss.snowdrop</groupId>
+  <groupId>me.snowdrop</groupId>
   <artifactId>spring-cloud-stream-binder-artemis-parent</artifactId>
   <version>1.0.0-SNAPSHOT</version>
   <packaging>pom</packaging>
