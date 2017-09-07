@@ -1,3 +1,5 @@
 language: java
 jdk: oraclejdk8
-script: mvn verify
+script:
+  - mvn test
+  - mvn verify -Dit.test=ArtemisBinderWithStreamProcessorIT
