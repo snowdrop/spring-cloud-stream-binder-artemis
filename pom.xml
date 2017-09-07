@@ -107,5 +107,6 @@
 
   <modules>
     <module>spring-cloud-stream-binder-artemis</module>
+    <module>spring-cloud-starter-stream-artemis</module>
   </modules>
 </project>
