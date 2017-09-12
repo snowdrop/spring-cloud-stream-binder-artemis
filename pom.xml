@@ -4,13 +4,6 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <parent>
-    <groupId>org.springframework.cloud</groupId>
-    <artifactId>spring-cloud-build</artifactId>
-    <version>2.0.0.M1</version>
-    <relativePath />
-  </parent>
-
   <groupId>me.snowdrop</groupId>
   <artifactId>spring-cloud-stream-binder-artemis-parent</artifactId>
   <version>1.0.0-SNAPSHOT</version>
@@ -26,7 +19,8 @@
     <assertj.version>3.8.0</assertj.version>
     <awaitility.version>3.0.0</awaitility.version>
     <junit.version>4.12</junit.version>
-    <spring-cloud-stream.version>2.0.0.M1</spring-cloud-stream.version>
+    <spring-boot.version>1.5.6.RELEASE</spring-boot.version>
+    <spring-cloud-stream-dependencies.version>Chelsea.SR2</spring-cloud-stream-dependencies.version>
     <spring-integration-java-dsl.version>1.2.2.RELEASE</spring-integration-java-dsl.version>
     <spring-integration-jms.version>4.3.9.RELEASE</spring-integration-jms.version>
   </properties>
@@ -44,30 +38,21 @@
 
   <dependencyManagement>
     <dependencies>
+      <!-- Artemis dependencies  - Declared here to override the versions used in spring-boot starters-->
       <dependency>
-        <groupId>org.springframework.cloud</groupId>
-        <artifactId>spring-cloud-stream</artifactId>
-        <version>${spring-cloud-stream.version}</version>
+        <groupId>org.apache.activemq</groupId>
+        <artifactId>artemis-jms-client</artifactId>
+        <version>${artemis.version}</version>
       </dependency>
       <dependency>
-        <groupId>org.springframework.cloud</groupId>
-        <artifactId>spring-cloud-stream-codec</artifactId>
-        <version>${spring-cloud-stream.version}</version>
+        <groupId>org.apache.activemq</groupId>
+        <artifactId>artemis-commons</artifactId>
+        <version>${artemis.version}</version>
       </dependency>
       <dependency>
-        <groupId>org.springframework.integration</groupId>
-        <artifactId>spring-integration-jms</artifactId>
-        <version>${spring-integration-jms.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.springframework.integration</groupId>
-        <artifactId>spring-integration-java-dsl</artifactId>
-        <version>${spring-integration-java-dsl.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.springframework.boot</groupId>
-        <artifactId>spring-boot-starter-artemis</artifactId>
-        <version>${spring-boot.version}</version>
+        <groupId>org.apache.activemq</groupId>
+        <artifactId>artemis-selector</artifactId>
+        <version>${artemis.version}</version>
       </dependency>
       <dependency>
         <groupId>org.apache.activemq</groupId>
@@ -79,6 +64,42 @@
         <artifactId>artemis-jms-server</artifactId>
         <version>${artemis.version}</version>
       </dependency>
+
+      <dependency>
+        <groupId>org.springframework.cloud</groupId>
+        <artifactId>spring-cloud-stream-dependencies</artifactId>
+        <version>${spring-cloud-stream-dependencies.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+
+      <!-- Need to explicitly exclude "artemis-jms-client" as that carries in artemis 1.5.x version-->
+      <dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-dependencies</artifactId>
+        <version>${spring-boot.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+        <exclusions>
+          <exclusion>
+            <groupId>org.apache.activemq</groupId>
+            <artifactId>artemis-jms-client</artifactId>
+          </exclusion>
+        </exclusions>
+      </dependency>
+
+      <dependency>
+        <groupId>org.springframework.integration</groupId>
+        <artifactId>spring-integration-jms</artifactId>
+        <version>${spring-integration-jms.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.springframework.integration</groupId>
+        <artifactId>spring-integration-java-dsl</artifactId>
+        <version>${spring-integration-java-dsl.version}</version>
+      </dependency>
+
+
       <dependency>
         <groupId>junit</groupId>
         <artifactId>junit</artifactId>
@@ -93,16 +114,6 @@
         <groupId>org.awaitility</groupId>
         <artifactId>awaitility</artifactId>
         <version>${awaitility.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.springframework.boot</groupId>
-        <artifactId>spring-boot-starter-test</artifactId>
-        <version>${spring-boot.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.springframework.cloud</groupId>
-        <artifactId>spring-cloud-stream-binder-test</artifactId>
-        <version>${spring-cloud-stream.version}</version>
       </dependency>
     </dependencies>
   </dependencyManagement>
