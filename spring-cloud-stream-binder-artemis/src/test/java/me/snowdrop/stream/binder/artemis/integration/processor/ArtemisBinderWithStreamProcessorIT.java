@@ -42,7 +42,9 @@ import static org.assertj.core.api.Assertions.assertThat;
         properties = {
                 "spring.cloud.stream.bindings.input.destination=testIn",
                 "spring.cloud.stream.bindings.input.group=streamApplication",
-                "spring.cloud.stream.bindings.output.destination=testOut"
+                "spring.cloud.stream.bindings.output.destination=testOut",
+                "spring.cloud.stream.artemis.binder.transport=org.apache.activemq.artemis.core.remoting.impl.invm"
+                        + ".InVMConnectorFactory"
         }
 )
 @EnableAutoConfiguration

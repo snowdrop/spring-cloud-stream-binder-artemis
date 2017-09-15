@@ -33,7 +33,12 @@ import org.springframework.test.context.junit4.SpringRunner;
  * @author <a href="mailto:gytis@redhat.com">Gytis Trikleris</a>
  */
 @RunWith(SpringRunner.class)
-@SpringBootTest
+@SpringBootTest(
+        properties = {
+                "spring.cloud.stream.artemis.binder.transport=org.apache.activemq.artemis.core.remoting.impl.invm"
+                        + ".InVMConnectorFactory"
+        }
+)
 public class ArtemisBinderIT extends
         PartitionCapableBinderTests<ArtemisTestBinder, ExtendedConsumerProperties<ArtemisConsumerProperties>,
                 ExtendedProducerProperties<ArtemisProducerProperties>> {
