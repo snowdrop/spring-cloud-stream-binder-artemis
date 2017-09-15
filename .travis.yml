@@ -1,5 +1,5 @@
 language: java
 jdk: oraclejdk8
 script:
-  - mvn test
-  - mvn verify -Dit.test=ArtemisBinderWithStreamProcessorIT
+  - ./mvnw test
+  - ./mvnw verify -Dit.test=ArtemisBinderWithStreamProcessorIT
