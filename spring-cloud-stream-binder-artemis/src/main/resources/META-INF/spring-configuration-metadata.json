@@ -12,18 +12,6 @@
       "type": "java.lang.String",
       "description": "Transport to be used to connect to an Artemis server e.g. org.apache.activemq.artemis.core.remoting.impl.netty.NettyConnectorFactory",
       "sourceType": "me.snowdrop.stream.binder.artemis.properties.ArtemisBinderConfigurationProperties"
-    },
-    {
-      "name": "spring.cloud.stream.artemis.binder.host",
-      "type": "java.lang.String",
-      "description": "Host of an Artemis server e.g. localhost",
-      "sourceType": "me.snowdrop.stream.binder.artemis.properties.ArtemisBinderConfigurationProperties"
-    },
-    {
-      "name": "spring.cloud.stream.artemis.binder.port",
-      "type": "java.lang.String",
-      "description": "Port of an Artemis server e.g. 61617",
-      "sourceType": "me.snowdrop.stream.binder.artemis.properties.ArtemisBinderConfigurationProperties"
     }
   ],
   "hints": []

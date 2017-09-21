@@ -26,7 +26,8 @@ import org.apache.activemq.artemis.api.core.client.ServerLocator;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-import org.springframework.boot.autoconfigure.jms.JndiConnectionFactoryAutoConfiguration;
+import org.springframework.boot.autoconfigure.jms.artemis.ArtemisAutoConfiguration;
+import org.springframework.boot.autoconfigure.jms.artemis.ArtemisProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.stream.config.codec.kryo.KryoCodecAutoConfiguration;
 import org.springframework.cloud.stream.provisioning.ProvisioningProvider;
@@ -35,7 +36,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.integration.codec.Codec;
 import org.springframework.jms.support.converter.MessagingMessageConverter;
-import org.springframework.util.StringUtils;
 
 import javax.jms.ConnectionFactory;
 import java.util.HashMap;
@@ -45,7 +45,7 @@ import java.util.Map;
  * @author <a href="mailto:gytis@redhat.com">Gytis Trikleris</a>
  */
 @Configuration
-@AutoConfigureAfter(JndiConnectionFactoryAutoConfiguration.class)
+@AutoConfigureAfter(ArtemisAutoConfiguration.class)
 @ConditionalOnClass(ServerLocator.class)
 @EnableConfigurationProperties({ArtemisBinderConfigurationProperties.class, ArtemisExtendedBindingProperties.class})
 @Import(KryoCodecAutoConfiguration.class)
@@ -77,15 +77,12 @@ public class ArtemisBinderAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean(TransportConfiguration.class)
-    TransportConfiguration transportConfiguration(ArtemisBinderConfigurationProperties properties) {
+    TransportConfiguration transportConfiguration(ArtemisBinderConfigurationProperties binderProperties,
+            ArtemisProperties artemisProperties) {
         Map<String, Object> config = new HashMap<>();
-        if (!StringUtils.isEmpty(properties.getHost())) {
-            config.put("host", properties.getHost());
-        }
-        if (!StringUtils.isEmpty(properties.getPort())) {
-            config.put("port", properties.getPort());
-        }
-        return new TransportConfiguration(properties.getTransport(), config);
+        config.put("host", artemisProperties.getHost());
+        config.put("port", artemisProperties.getPort());
+        return new TransportConfiguration(binderProperties.getTransport(), config);
     }
 
     @Bean
