@@ -12,6 +12,8 @@
 
   <artifactId>spring-cloud-starter-stream-artemis</artifactId>
 
+  <name>Spring Cloud Stream Artemis binder starter</name>
+
   <dependencies>
     <dependency>
       <groupId>me.snowdrop</groupId>

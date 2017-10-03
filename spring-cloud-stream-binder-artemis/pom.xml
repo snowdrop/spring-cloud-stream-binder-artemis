@@ -12,6 +12,8 @@
 
   <artifactId>spring-cloud-stream-binder-artemis</artifactId>
 
+  <name>Spring Cloud Stream Artemis binder</name>
+
   <dependencies>
     <dependency>
       <groupId>org.apache.activemq</groupId>
