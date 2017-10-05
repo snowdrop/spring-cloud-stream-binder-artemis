@@ -14,22 +14,13 @@
  * limitations under the License.
  */
 
-package me.snowdrop.stream.binder.artemis.integration.generic;
+package me.snowdrop.stream.binder.artemis.integration.e2e.common;
 
-import me.snowdrop.stream.binder.artemis.ArtemisBinderAutoConfiguration;
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.cloud.stream.annotation.EnableBinding;
 
 /**
  * @author <a href="mailto:gytis@redhat.com">Gytis Trikleris</a>
  */
-@SpringBootApplication
-@ImportAutoConfiguration(ArtemisBinderAutoConfiguration.class)
-public class StreamApplication {
-
-    public static void main(String[] args) {
-        SpringApplication.run(StreamApplication.class, args);
-    }
-
+@EnableBinding(AlternativeSink.class)
+public class AlternativeReceiver {
 }

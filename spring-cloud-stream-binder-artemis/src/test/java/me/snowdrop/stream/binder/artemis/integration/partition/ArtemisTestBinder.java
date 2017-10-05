@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package me.snowdrop.stream.binder.artemis.integration.generic;
+package me.snowdrop.stream.binder.artemis.integration.partition;
 
 import me.snowdrop.stream.binder.artemis.ArtemisMessageChannelBinder;
 import me.snowdrop.stream.binder.artemis.properties.ArtemisConsumerProperties;

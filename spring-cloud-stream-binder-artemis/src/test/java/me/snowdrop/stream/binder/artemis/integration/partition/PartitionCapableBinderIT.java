@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package me.snowdrop.stream.binder.artemis.integration.generic;
+package me.snowdrop.stream.binder.artemis.integration.partition;
 
 import me.snowdrop.stream.binder.artemis.ArtemisMessageChannelBinder;
 import me.snowdrop.stream.binder.artemis.properties.ArtemisConsumerProperties;
@@ -39,7 +39,7 @@ import org.springframework.test.context.junit4.SpringRunner;
                         + ".InVMConnectorFactory"
         }
 )
-public class ArtemisBinderIT extends
+public class PartitionCapableBinderIT extends
         PartitionCapableBinderTests<ArtemisTestBinder, ExtendedConsumerProperties<ArtemisConsumerProperties>,
                 ExtendedProducerProperties<ArtemisProducerProperties>> {
 
