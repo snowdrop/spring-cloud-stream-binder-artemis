@@ -6,6 +6,7 @@
 - [Usage examples](#usage-examples)
 - [Building and testing the project](#building-and-testing-the-project)
 - [Contributing](#contributing)
+- [Releasing](#releasing)
 
 # Notice
 
@@ -71,3 +72,20 @@ Tests are executed by default when building a project without any parameters:
 We're always happy to get help from the community. So do not hesitate to raise a pull request with a new feature, a bug fix or any other improvement.
 
 Also, if you stumble upon an issues or think that some feature should be added, please, create an issue on [GitHub](https://github.com/snowdrop/spring-cloud-stream-binder-artemis/issues) or [JIRA](https://issues.jboss.org/projects/SB).
+
+# Releasing
+
+Dry run:
+```
+mvn release:prepare -DdryRun
+```
+
+Tag:
+```
+mvn release:prepare
+```
+
+Deploy:
+```
+mvn release:perform -DskipTests
+```
