@@ -25,7 +25,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.messaging.Message;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -45,7 +44,6 @@ import static me.snowdrop.stream.binder.artemis.utils.AwaitUtils.awaitForHandled
                 "spring.cloud.stream.bindings.alternativeInput.group=testGroup"
         }
 )
-@EnableAutoConfiguration
 public class SingleGroupEndToEndIT {
 
     private static final String[] MESSAGES = {

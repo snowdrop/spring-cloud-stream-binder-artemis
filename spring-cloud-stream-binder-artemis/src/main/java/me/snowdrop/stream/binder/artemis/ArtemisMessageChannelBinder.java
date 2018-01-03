@@ -74,13 +74,13 @@ public class ArtemisMessageChannelBinder extends
 
     @Override
     protected MessageHandler createProducerMessageHandler(ProducerDestination destination,
-            ExtendedProducerProperties<ArtemisProducerProperties> properties) throws Exception {
+            ExtendedProducerProperties<ArtemisProducerProperties> properties) {
         return new ArtemisMessageHandler(destination, connectionFactory, messageConverter);
     }
 
     @Override
     protected MessageProducer createConsumerEndpoint(ConsumerDestination destination, String group,
-            ExtendedConsumerProperties<ArtemisConsumerProperties> properties) throws Exception {
+            ExtendedConsumerProperties<ArtemisConsumerProperties> properties) {
         String subscriptionName = getSubscriptionName(destination.getName(), group);
 
         try (JMSContext context = connectionFactory.createContext()) {

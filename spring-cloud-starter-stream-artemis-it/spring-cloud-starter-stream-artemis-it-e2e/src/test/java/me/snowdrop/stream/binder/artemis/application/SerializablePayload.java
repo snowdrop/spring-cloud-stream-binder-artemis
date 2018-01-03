@@ -49,4 +49,9 @@ public class SerializablePayload implements Serializable {
     public int hashCode() {
         return value.hashCode();
     }
+
+    @Override
+    public String toString() {
+        return String.format("SerializablePayload{value='%s'}", value);
+    }
 }

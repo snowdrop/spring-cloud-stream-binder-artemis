@@ -6,13 +6,6 @@
       "sourceType": "me.snowdrop.stream.binder.artemis.properties.ArtemisBinderConfigurationProperties"
     }
   ],
-  "properties": [
-    {
-      "name": "spring.cloud.stream.artemis.binder.transport",
-      "type": "java.lang.String",
-      "description": "Transport to be used to connect to an Artemis server e.g. org.apache.activemq.artemis.core.remoting.impl.netty.NettyConnectorFactory",
-      "sourceType": "me.snowdrop.stream.binder.artemis.properties.ArtemisBinderConfigurationProperties"
-    }
-  ],
+  "properties": [],
   "hints": []
 }

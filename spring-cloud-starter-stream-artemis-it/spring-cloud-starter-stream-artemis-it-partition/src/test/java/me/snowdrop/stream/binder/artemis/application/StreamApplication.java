@@ -16,16 +16,13 @@
 
 package me.snowdrop.stream.binder.artemis.application;
 
-import me.snowdrop.stream.binder.artemis.ArtemisBinderAutoConfiguration;
 import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 /**
  * @author <a href="mailto:gytis@redhat.com">Gytis Trikleris</a>
  */
 @SpringBootApplication
-@ImportAutoConfiguration(ArtemisBinderAutoConfiguration.class)
 public class StreamApplication {
 
     public static void main(String[] args) {

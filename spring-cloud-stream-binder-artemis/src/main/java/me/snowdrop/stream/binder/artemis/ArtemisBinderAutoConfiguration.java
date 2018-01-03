@@ -17,17 +17,13 @@
 package me.snowdrop.stream.binder.artemis;
 
 import me.snowdrop.stream.binder.artemis.handlers.ListenerContainerFactory;
-import me.snowdrop.stream.binder.artemis.properties.ArtemisBinderConfigurationProperties;
 import me.snowdrop.stream.binder.artemis.properties.ArtemisExtendedBindingProperties;
 import me.snowdrop.stream.binder.artemis.provisioning.ArtemisProvisioningProvider;
-import org.apache.activemq.artemis.api.core.TransportConfiguration;
-import org.apache.activemq.artemis.api.core.client.ActiveMQClient;
-import org.apache.activemq.artemis.api.core.client.ServerLocator;
+import org.apache.activemq.artemis.jms.client.ActiveMQConnectionFactory;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.jms.artemis.ArtemisAutoConfiguration;
-import org.springframework.boot.autoconfigure.jms.artemis.ArtemisProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.stream.config.codec.kryo.KryoCodecAutoConfiguration;
 import org.springframework.cloud.stream.provisioning.ProvisioningProvider;
@@ -38,16 +34,14 @@ import org.springframework.integration.codec.Codec;
 import org.springframework.jms.support.converter.MessagingMessageConverter;
 
 import javax.jms.ConnectionFactory;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * @author <a href="mailto:gytis@redhat.com">Gytis Trikleris</a>
  */
 @Configuration
 @AutoConfigureAfter(ArtemisAutoConfiguration.class)
-@ConditionalOnClass(ServerLocator.class)
-@EnableConfigurationProperties({ArtemisBinderConfigurationProperties.class, ArtemisExtendedBindingProperties.class})
+@ConditionalOnBean(ActiveMQConnectionFactory.class)
+@EnableConfigurationProperties(ArtemisExtendedBindingProperties.class)
 @Import(KryoCodecAutoConfiguration.class)
 public class ArtemisBinderAutoConfiguration {
 
@@ -76,25 +70,9 @@ public class ArtemisBinderAutoConfiguration {
     }
 
     @Bean
-    @ConditionalOnMissingBean(TransportConfiguration.class)
-    TransportConfiguration transportConfiguration(ArtemisBinderConfigurationProperties binderProperties,
-            ArtemisProperties artemisProperties) {
-        Map<String, Object> config = new HashMap<>();
-        config.put("host", artemisProperties.getHost());
-        config.put("port", artemisProperties.getPort());
-        return new TransportConfiguration(binderProperties.getTransport(), config);
-    }
-
-    @Bean
-    @ConditionalOnMissingBean(ServerLocator.class)
-    ServerLocator serverLocator(TransportConfiguration transportConfiguration) {
-        return ActiveMQClient.createServerLocatorWithoutHA(transportConfiguration);
-    }
-
-    @Bean
     @ConditionalOnMissingBean(ProvisioningProvider.class)
-    ArtemisProvisioningProvider provisioningProvider(ServerLocator serverLocator) {
-        return new ArtemisProvisioningProvider(serverLocator);
+    ArtemisProvisioningProvider provisioningProvider(ActiveMQConnectionFactory connectionFactory) {
+        return new ArtemisProvisioningProvider(connectionFactory.getServerLocator());
     }
 
 }
