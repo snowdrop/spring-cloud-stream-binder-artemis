@@ -27,6 +27,10 @@ import org.springframework.messaging.Message;
 @EnableBinding(Sink.class)
 public class FirstReceiver extends AbstractReceiver {
 
+    public FirstReceiver() {
+        super("first-receiver");
+    }
+
     @StreamListener(Sink.INPUT)
     public void receive(Message message) {
         super.receive(message);

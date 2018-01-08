@@ -20,36 +20,29 @@ import me.snowdrop.stream.binder.artemis.application.StreamApplication;
 import me.snowdrop.stream.binder.artemis.properties.ArtemisConsumerProperties;
 import me.snowdrop.stream.binder.artemis.properties.ArtemisProducerProperties;
 import me.snowdrop.stream.binder.artemis.utils.ArtemisTestBinder;
-import org.apache.activemq.artemis.api.core.client.ServerLocator;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.jms.artemis.ArtemisAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.stream.binder.ExtendedConsumerProperties;
 import org.springframework.cloud.stream.binder.ExtendedProducerProperties;
 import org.springframework.cloud.stream.binder.PartitionCapableBinderTests;
 import org.springframework.cloud.stream.binder.Spy;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.context.junit4.SpringRunner;
 
 /**
  * @author <a href="mailto:gytis@redhat.com">Gytis Trikleris</a>
  */
 @RunWith(SpringRunner.class)
-@SpringBootTest(
-        classes = StreamApplication.class,
-        properties = {
-                "spring.cloud.stream.artemis.binder.transport=org.apache.activemq.artemis.core.remoting.impl.invm"
-                        + ".InVMConnectorFactory"
-        }
-)
+@SpringBootTest(classes = StreamApplication.class)
+@Import({ArtemisAutoConfiguration.class, ArtemisBinderAutoConfiguration.class})
 public class PartitionCapableBinderIT extends
         PartitionCapableBinderTests<ArtemisTestBinder, ExtendedConsumerProperties<ArtemisConsumerProperties>,
                 ExtendedProducerProperties<ArtemisProducerProperties>> {
 
     @Autowired
     private ArtemisMessageChannelBinder binder;
-
-    @Autowired
-    private ServerLocator serverLocator;
 
     @Override
     public Spy spyOn(String name) {
@@ -59,7 +52,7 @@ public class PartitionCapableBinderIT extends
     @Override
     protected ArtemisTestBinder getBinder() throws Exception {
         if (testBinder == null) {
-            testBinder = new ArtemisTestBinder(binder, serverLocator);
+            testBinder = new ArtemisTestBinder(binder);
         }
 
         return testBinder;

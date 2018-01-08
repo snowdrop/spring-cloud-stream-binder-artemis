@@ -26,6 +26,10 @@ import org.springframework.messaging.Message;
 @EnableBinding(AlternativeSink.class)
 public class SecondReceiver extends AbstractReceiver {
 
+    public SecondReceiver() {
+        super("second-receiver");
+    }
+
     @StreamListener(AlternativeSink.ALTERNATIVE_INPUT)
     public void receive(Message message) {
         super.receive(message);

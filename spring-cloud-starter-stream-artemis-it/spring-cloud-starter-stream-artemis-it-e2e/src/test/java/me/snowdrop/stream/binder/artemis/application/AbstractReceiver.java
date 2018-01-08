@@ -21,6 +21,7 @@ import org.springframework.messaging.Message;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
+import java.util.logging.Logger;
 
 /**
  * @author <a href="mailto:gytis@redhat.com">Gytis Trikleris</a>
@@ -35,15 +36,23 @@ public abstract class AbstractReceiver {
 
     private final List<Message> receivedMessages = new ArrayList<>();
 
+    private final Logger logger;
+
     private CountDownLatch latch;
 
+    public AbstractReceiver(String id) {
+        this.logger = Logger.getLogger(id);
+    }
+
     public void receive(Message message) {
+        logger.info(String.format("received message='%s'", message));
         receivedMessages.add(message);
 
         if (EXCEPTION_REQUEST.equals(message.getPayload())) {
             throw new RuntimeException(REQUESTED_EXCEPTION);
         }
 
+        logger.info(String.format("handled message='%s'", message));
         handledMessages.add(message);
         if (latch != null) {
             latch.countDown();
@@ -55,14 +64,18 @@ public abstract class AbstractReceiver {
     }
 
     public List<Message> getHandledMessages() {
+        logger.info(String.format("returning handledMessages='%s'", handledMessages));
         return handledMessages;
     }
 
     public List<Message> getReceivedMessages() {
+        logger.info(String.format("returning receivedMessages='%s'", receivedMessages));
         return receivedMessages;
     }
 
     public void clear() {
+        logger.info(String.format("clearing handledMessages='%s' and receivedMessages='%s'", handledMessages,
+                receivedMessages));
         handledMessages.clear();
         receivedMessages.clear();
     }

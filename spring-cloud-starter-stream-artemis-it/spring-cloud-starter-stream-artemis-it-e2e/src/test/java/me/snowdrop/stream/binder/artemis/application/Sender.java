@@ -24,12 +24,15 @@ import org.springframework.messaging.Message;
 
 import java.util.Collections;
 import java.util.Map;
+import java.util.logging.Logger;
 
 /**
  * @author <a href="mailto:gytis@redhat.com">Gytis Trikleris</a>
  */
 @EnableBinding(Source.class)
 public class Sender {
+
+    private final Logger logger = Logger.getLogger(Sender.class.getSimpleName());
 
     private final Source source;
 
@@ -43,6 +46,8 @@ public class Sender {
     }
 
     public void send(Object payload, Map<String, Object> headers) {
+        logger.info(String.format("send payload='%s' with headers='%s'", payload, headers));
+
         MessageBuilder<Object> messageBuilder = MessageBuilder.withPayload(payload);
         headers.forEach(messageBuilder::setHeader);
         Message message = messageBuilder.build();

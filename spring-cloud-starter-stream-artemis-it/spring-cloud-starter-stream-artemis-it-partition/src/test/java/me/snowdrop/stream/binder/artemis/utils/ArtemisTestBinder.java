@@ -19,15 +19,9 @@ package me.snowdrop.stream.binder.artemis.utils;
 import me.snowdrop.stream.binder.artemis.ArtemisMessageChannelBinder;
 import me.snowdrop.stream.binder.artemis.properties.ArtemisConsumerProperties;
 import me.snowdrop.stream.binder.artemis.properties.ArtemisProducerProperties;
-import org.apache.activemq.artemis.api.core.client.ClientSession;
-import org.apache.activemq.artemis.api.core.client.ClientSessionFactory;
-import org.apache.activemq.artemis.api.core.client.ServerLocator;
 import org.springframework.cloud.stream.binder.AbstractTestBinder;
 import org.springframework.cloud.stream.binder.ExtendedConsumerProperties;
 import org.springframework.cloud.stream.binder.ExtendedProducerProperties;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * @author <a href="mailto:gytis@redhat.com">Gytis Trikleris</a>
@@ -36,12 +30,7 @@ public class ArtemisTestBinder extends
         AbstractTestBinder<ArtemisMessageChannelBinder, ExtendedConsumerProperties<ArtemisConsumerProperties>,
                 ExtendedProducerProperties<ArtemisProducerProperties>> {
 
-    private final List<String> queues = new ArrayList<>();
-
-    private final ServerLocator serverLocator;
-
-    public ArtemisTestBinder(ArtemisMessageChannelBinder binder, ServerLocator serverLocator) {
-        this.serverLocator = serverLocator;
+    public ArtemisTestBinder(ArtemisMessageChannelBinder binder) {
         this.setBinder(binder);
     }
 

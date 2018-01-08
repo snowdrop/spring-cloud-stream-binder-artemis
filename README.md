@@ -18,21 +18,13 @@ This project is under development and not all expected features have yet been im
 
 This binder enables Spring Cloud Stream applications to use Apache Artemis message broker as a connection medium. It is transparent to the application code and can be enabled with a Maven dependency and Spring Boot configuration in the same way as any other Spring Cloud Stream binder.
 
-It is compatible with Apache Artemis 2.1.0, Spring Boot 1.5.6.RELEASE and Spring Cloud Stream Chelsea.SR2. For more information on Spring Cloud Stream please refer to its [documentation](https://docs.spring.io/spring-cloud-stream/docs/Chelsea.SR2/reference/htmlsingle).
+It is compatible with Apache Artemis 1.5.5, Spring Boot 1.5.9.RELEASE and Spring Cloud Stream Chelsea.SR2. For more information on Spring Cloud Stream please refer to its [documentation](https://docs.spring.io/spring-cloud-stream/docs/Chelsea.SR2/reference/htmlsingle).
 
 # Configuration
 
 ## Artemis broker configuration
 
-This binder depends on a Spring Boot Artemis integration to locate Artemis broker. So please refer to its [documentation](https://docs.spring.io/spring-boot/docs/1.5.6.RELEASE/reference/html/boot-features-messaging.html#boot-features-artemis) in order to setup that.
-
-## Artemis binder configuration
-
-Following are the Artemis binder specific properties (the list will increase as implementation matures):
-
-| Name | Required | Default value | Description |
-| ---- | -------- | ------------- | ----------- |
-| spring.cloud.stream.artemis.binder.transport | yes | - | Transport to be used to connect to an Artemis server e.g. `org.apache.activemq.artemis.core.remoting.impl.netty.NettyConnectorFactory` or `org.apache.activemq.artemis.core.remoting.impl.invm.InVMConnectorFactory` |
+This binder depends on a Spring Boot Artemis integration to locate Artemis broker. So please refer to its [documentation](https://docs.spring.io/spring-boot/docs/1.5.9.RELEASE/reference/html/boot-features-messaging.html#boot-features-artemis) in order to setup that.
 
 ## Spring Cloud Stream configuration
 
