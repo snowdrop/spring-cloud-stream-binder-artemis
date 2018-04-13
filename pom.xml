@@ -4,7 +4,7 @@
 
   <groupId>me.snowdrop</groupId>
   <artifactId>spring-cloud-stream-binder-artemis-parent</artifactId>
-  <version>1.0.0.Alpha2-SNAPSHOT</version>
+  <version>0.0.1-SNAPSHOT</version>
   <packaging>pom</packaging>
 
   <name>Spring Cloud Stream Artemis binder parent</name>
