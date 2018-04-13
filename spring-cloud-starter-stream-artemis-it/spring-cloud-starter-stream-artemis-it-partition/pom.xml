@@ -5,7 +5,7 @@
   <parent>
     <groupId>me.snowdrop</groupId>
     <artifactId>spring-cloud-starter-stream-artemis-it</artifactId>
-    <version>0.0.1</version>
+    <version>0.0.2-SNAPSHOT</version>
   </parent>
 
   <artifactId>spring-cloud-starter-stream-artemis-it-partition</artifactId>
