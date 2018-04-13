@@ -96,7 +96,8 @@ public class ArtemisMessageChannelBinderTest {
     public void shouldCreateProducerMessageHandler() throws Exception {
         when(mockProducerProperties.isPartitioned()).thenReturn(false);
 
-        MessageHandler handler = binder.createProducerMessageHandler(mockProducerDestination, mockProducerProperties);
+        MessageHandler handler =
+                binder.createProducerMessageHandler(mockProducerDestination, mockProducerProperties, null);
 
         assertThat(handler).isInstanceOf(ArtemisMessageHandler.class);
     }

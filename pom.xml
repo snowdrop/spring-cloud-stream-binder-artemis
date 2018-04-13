@@ -54,10 +54,10 @@
     <assertj.version>3.8.0</assertj.version>
     <awaitility.version>3.0.0</awaitility.version>
     <junit.version>4.12</junit.version>
-    <spring-boot.version>1.5.9.RELEASE</spring-boot.version>
-    <spring-cloud-stream-dependencies.version>Chelsea.SR2</spring-cloud-stream-dependencies.version>
-    <spring-integration-java-dsl.version>1.2.2.RELEASE</spring-integration-java-dsl.version>
-    <spring-integration-jms.version>4.3.9.RELEASE</spring-integration-jms.version>
+    <spring-boot.version>1.5.12.RELEASE</spring-boot.version>
+    <spring-cloud-stream-dependencies.version>Ditmars.SR3</spring-cloud-stream-dependencies.version>
+    <spring-integration-java-dsl.version>1.2.3.RELEASE</spring-integration-java-dsl.version>
+    <spring-integration-jms.version>4.3.15.RELEASE</spring-integration-jms.version>
   </properties>
 
   <prerequisites>

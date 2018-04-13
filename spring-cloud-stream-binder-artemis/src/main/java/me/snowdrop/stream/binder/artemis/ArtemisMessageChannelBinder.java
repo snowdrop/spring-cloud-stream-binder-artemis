@@ -74,7 +74,8 @@ public class ArtemisMessageChannelBinder extends
 
     @Override
     protected MessageHandler createProducerMessageHandler(ProducerDestination destination,
-            ExtendedProducerProperties<ArtemisProducerProperties> properties) {
+            ExtendedProducerProperties<ArtemisProducerProperties> properties, MessageChannel errorChannel) {
+        // TODO setup an error channel
         return new ArtemisMessageHandler(destination, connectionFactory, messageConverter);
     }
 
