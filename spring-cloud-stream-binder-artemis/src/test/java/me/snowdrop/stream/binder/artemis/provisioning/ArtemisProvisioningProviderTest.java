@@ -22,7 +22,11 @@ import static me.snowdrop.stream.binder.artemis.common.NamingUtils.getQueueName;
 import static org.apache.activemq.artemis.api.core.SimpleString.toSimpleString;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
+import static org.mockito.Matchers.anyBoolean;
+import static org.mockito.Matchers.anyInt;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -34,6 +38,10 @@ public class ArtemisProvisioningProviderTest {
     private final String address = "test-address";
 
     private final String[] groups = new String[]{"test-group-0", "test-group-1"};
+
+    private final String username = "test-user";
+
+    private final String password = "test-password";
 
     @Mock
     private ServerLocator mockServerLocator;
@@ -57,8 +65,10 @@ public class ArtemisProvisioningProviderTest {
         MockitoAnnotations.initMocks(this);
         when(mockServerLocator.createSessionFactory()).thenReturn(mockClientSessionFactory);
         when(mockClientSessionFactory.createSession()).thenReturn(mockClientSession);
+        when(mockClientSessionFactory.createSession(eq(username), eq(password), anyBoolean(), anyBoolean(),
+                anyBoolean(), anyBoolean(), anyInt())).thenReturn(mockClientSession);
         when(mockProducerProperties.getRequiredGroups()).thenReturn(new String[]{});
-        provider = new ArtemisProvisioningProvider(mockServerLocator);
+        provider = new ArtemisProvisioningProvider(mockServerLocator, null, null);
     }
 
     @Test
@@ -244,6 +254,25 @@ public class ArtemisProvisioningProviderTest {
                     String.format("Failed to create queue '%s' with address '%s'", actualAddressQueueName,
                             actualAddress));
         }
+    }
+
+    @Test
+    public void shouldNotAuthenticateWhenProvisioning() throws ActiveMQException {
+        provider.provisionConsumerDestination(address, groups[0], mockConsumerProperties);
+
+        verify(mockClientSessionFactory).createSession();
+    }
+
+    @Test
+    public void shouldAuthenticateWhenProvisioning() throws ActiveMQException {
+        when(mockServerLocator.isPreAcknowledge()).thenReturn(true);
+        when(mockServerLocator.getAckBatchSize()).thenReturn(10);
+
+        provider = new ArtemisProvisioningProvider(mockServerLocator, username, password);
+        provider.provisionConsumerDestination(address, groups[0], mockConsumerProperties);
+
+        verify(mockClientSessionFactory, times(0)).createSession();
+        verify(mockClientSessionFactory).createSession(username, password, true, false, false, true, 10);
     }
 
 }

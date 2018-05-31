@@ -24,6 +24,7 @@ import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.jms.artemis.ArtemisAutoConfiguration;
+import org.springframework.boot.autoconfigure.jms.artemis.ArtemisProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.stream.config.codec.kryo.KryoCodecAutoConfiguration;
 import org.springframework.cloud.stream.provisioning.ProvisioningProvider;
@@ -71,8 +72,10 @@ public class ArtemisBinderAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean(ProvisioningProvider.class)
-    ArtemisProvisioningProvider provisioningProvider(ActiveMQConnectionFactory connectionFactory) {
-        return new ArtemisProvisioningProvider(connectionFactory.getServerLocator());
+    ArtemisProvisioningProvider provisioningProvider(ActiveMQConnectionFactory connectionFactory,
+            ArtemisProperties artemisProperties) {
+        return new ArtemisProvisioningProvider(connectionFactory.getServerLocator(), artemisProperties.getUser(),
+                artemisProperties.getPassword());
     }
 
 }

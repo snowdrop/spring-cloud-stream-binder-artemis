@@ -51,8 +51,14 @@ public class ArtemisProvisioningProvider implements
 
     private final ServerLocator serverLocator;
 
-    public ArtemisProvisioningProvider(ServerLocator serverLocator) {
+    private final String username;
+
+    private final String password;
+
+    public ArtemisProvisioningProvider(ServerLocator serverLocator, String username, String password) {
         this.serverLocator = serverLocator;
+        this.username = username;
+        this.password = password;
     }
 
     /**
@@ -145,12 +151,21 @@ public class ArtemisProvisioningProvider implements
         logger.fine(String.format("Creating queue='%s' with address='%s'", name, address));
 
         try (ClientSessionFactory sessionFactory = serverLocator.createSessionFactory();
-             ClientSession session = sessionFactory.createSession()) {
+             ClientSession session = getClientSession(sessionFactory)) {
             session.createSharedQueue(address, name, true);
         } catch (Exception e) {
             throw new ProvisioningException(
                     String.format("Failed to create queue '%s' with address '%s'", name, address), e);
         }
+    }
+
+    private ClientSession getClientSession(ClientSessionFactory clientSessionFactory) throws Exception {
+        if (username == null) {
+            return clientSessionFactory.createSession();
+        }
+
+        return clientSessionFactory.createSession(username, password, true, false, false,
+                serverLocator.isPreAcknowledge(), serverLocator.getAckBatchSize());
     }
 
     private String decorateJmsAddress(String address) {
