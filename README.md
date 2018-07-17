@@ -18,19 +18,19 @@ This project is under development and not all expected features have yet been im
 
 This binder enables Spring Cloud Stream applications to use Apache Artemis message broker as a connection medium. It is transparent to the application code and can be enabled with a Maven dependency and Spring Boot configuration in the same way as any other Spring Cloud Stream binder.
 
-It is compatible with Apache Artemis 1.5.5, Spring Boot 1.5.9.RELEASE and Spring Cloud Stream Chelsea.SR2. For more information on Spring Cloud Stream please refer to its [documentation](https://docs.spring.io/spring-cloud-stream/docs/Chelsea.SR2/reference/htmlsingle).
+It is compatible with Apache Artemis 1.5.6, Spring Boot 1.5.12.RELEASE and Spring Cloud Stream Ditmars.SR3. For more information on Spring Cloud Stream please refer to its [documentation](https://docs.spring.io/spring-cloud-stream/docs/Chelsea.SR2/reference/htmlsingle).
 
 # Configuration
 
 ## Artemis broker configuration
 
-This binder depends on a Spring Boot Artemis integration to locate Artemis broker. So please refer to its [documentation](https://docs.spring.io/spring-boot/docs/1.5.9.RELEASE/reference/html/boot-features-messaging.html#boot-features-artemis) in order to setup that.
+This binder depends on Spring Boot Artemis integration to locate Artemis broker. So please refer to its [documentation](https://docs.spring.io/spring-boot/docs/1.5.12.RELEASE/reference/html/boot-features-messaging.html#boot-features-artemis) in order to setup that.
 
 ## Spring Cloud Stream configuration
 
-Artemis binder supports Spring Cloud Stream configuration as described in its [documentation](https://docs.spring.io/spring-cloud-stream/docs/Chelsea.SR2/reference/htmlsingle/#_configuration_options).
+Artemis binder supports Spring Cloud Stream configuration as described in its [documentation](https://docs.spring.io/spring-cloud-stream/docs/Ditmars.SR3/reference/htmlsingle/#_configuration_options).
 
-Note: support for consumer retry has not yet been implemented. Thus, following properties are no supported: `maxAttempts`, `backOffInitialInterval`, `backOffMaxInterval`, `backOffMultiplier`.
+Note: support for consumer retry has not yet been implemented. Thus, following properties are not supported: `maxAttempts`, `backOffInitialInterval`, `backOffMaxInterval`, `backOffMultiplier`.
 
 # Usage examples
 
