@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2017 Red Hat, Inc, and individual contributors.
+ * Copyright 2016-2018 Red Hat, Inc, and individual contributors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,46 +13,33 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package me.snowdrop.stream.binder.artemis.sources;
 
-package me.snowdrop.stream.binder.artemis.application;
-
-import org.springframework.beans.factory.annotation.Autowired;
+import me.snowdrop.stream.binder.artemis.application.SerializablePayload;
 import org.springframework.cloud.stream.annotation.EnableBinding;
 import org.springframework.cloud.stream.messaging.Source;
 import org.springframework.integration.support.MessageBuilder;
 import org.springframework.messaging.Message;
-
-import java.util.Collections;
-import java.util.Map;
-import java.util.logging.Logger;
+import org.springframework.messaging.MessageHeaders;
 
 /**
  * @author <a href="mailto:gytis@redhat.com">Gytis Trikleris</a>
  */
 @EnableBinding(Source.class)
-public class Sender {
-
-    private final Logger logger = Logger.getLogger(Sender.class.getSimpleName());
+public class SerializableStreamSource {
 
     private final Source source;
 
-    @Autowired
-    public Sender(Source source) {
+    public SerializableStreamSource(Source source) {
         this.source = source;
     }
 
-    public void send(Object payload) {
-        send(payload, Collections.emptyMap());
-    }
-
-    public void send(Object payload, Map<String, Object> headers) {
-        logger.info(String.format("send payload='%s' with headers='%s'", payload, headers));
-
-        MessageBuilder<Object> messageBuilder = MessageBuilder.withPayload(payload);
-        headers.forEach(messageBuilder::setHeader);
-        Message message = messageBuilder.build();
+    public void send(SerializablePayload payload) {
+        Message<SerializablePayload> message = MessageBuilder
+                .withPayload(payload)
+                .setHeader(MessageHeaders.CONTENT_TYPE, "application/x-java-serialized-object")
+                .build();
         source.output()
                 .send(message);
     }
-
 }

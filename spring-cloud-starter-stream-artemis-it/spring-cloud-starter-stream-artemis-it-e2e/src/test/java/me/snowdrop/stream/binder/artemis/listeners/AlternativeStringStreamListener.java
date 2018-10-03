@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2017 Red Hat, Inc, and individual contributors.
+ * Copyright 2016-2018 Red Hat, Inc, and individual contributors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,26 +13,29 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package me.snowdrop.stream.binder.artemis.listeners;
 
-package me.snowdrop.stream.binder.artemis.application;
+import java.util.LinkedList;
+import java.util.List;
 
+import me.snowdrop.stream.binder.artemis.application.AlternativeSink;
 import org.springframework.cloud.stream.annotation.EnableBinding;
 import org.springframework.cloud.stream.annotation.StreamListener;
-import org.springframework.messaging.Message;
 
 /**
  * @author <a href="mailto:gytis@redhat.com">Gytis Trikleris</a>
  */
 @EnableBinding(AlternativeSink.class)
-public class SecondReceiver extends AbstractReceiver {
+public class AlternativeStringStreamListener {
 
-    public SecondReceiver() {
-        super("second-receiver");
-    }
+    private List<String> payloads = new LinkedList<>();
 
     @StreamListener(AlternativeSink.ALTERNATIVE_INPUT)
-    public void receive(Message message) {
-        super.receive(message);
+    public void streamListener(String payload) {
+        payloads.add(payload);
     }
 
+    public List<String> getPayloads() {
+        return payloads;
+    }
 }

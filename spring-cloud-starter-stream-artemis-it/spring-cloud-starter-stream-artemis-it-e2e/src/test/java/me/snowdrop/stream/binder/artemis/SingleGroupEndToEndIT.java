@@ -16,22 +16,22 @@
 
 package me.snowdrop.stream.binder.artemis;
 
-import me.snowdrop.stream.binder.artemis.application.FirstReceiver;
-import me.snowdrop.stream.binder.artemis.application.SecondReceiver;
-import me.snowdrop.stream.binder.artemis.application.Sender;
+import java.util.List;
+
 import me.snowdrop.stream.binder.artemis.application.StreamApplication;
-import me.snowdrop.stream.binder.artemis.utils.Assertions;
-import org.junit.Before;
+import me.snowdrop.stream.binder.artemis.listeners.AlternativeStringStreamListener;
+import me.snowdrop.stream.binder.artemis.listeners.StringStreamListener;
+import me.snowdrop.stream.binder.artemis.sources.StringStreamSource;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.messaging.Message;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import java.util.List;
-
-import static me.snowdrop.stream.binder.artemis.utils.AwaitUtils.awaitForHandledMessages;
+import static java.util.concurrent.TimeUnit.SECONDS;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.awaitility.Awaitility.await;
 
 /**
  * @author <a href="mailto:gytis@redhat.com">Gytis Trikleris</a>
@@ -40,44 +40,36 @@ import static me.snowdrop.stream.binder.artemis.utils.AwaitUtils.awaitForHandled
 @SpringBootTest(
         classes = StreamApplication.class,
         properties = {
-                "spring.cloud.stream.bindings.input.group=testGroup",
-                "spring.cloud.stream.bindings.alternativeInput.group=testGroup"
+                "spring.cloud.stream.bindings.output.destination=single-group-destination",
+                "spring.cloud.stream.bindings.input.destination=single-group-destination",
+                "spring.cloud.stream.bindings.alternativeInput.destination=single-group-destination",
+                "spring.cloud.stream.bindings.input.group=group-1",
+                "spring.cloud.stream.bindings.alternativeInput.group=group-1"
         }
 )
+@Import({ StringStreamSource.class, StringStreamListener.class, AlternativeStringStreamListener.class })
 public class SingleGroupEndToEndIT {
 
-    private static final String[] MESSAGES = {
-            "Test message 1", "Test message 2", "Test message 3", "Test message 4"
-    };
+    @Autowired
+    private StringStreamSource source;
 
     @Autowired
-    private Sender sender;
+    private StringStreamListener listener;
 
     @Autowired
-    private FirstReceiver firstReceiver;
-
-    @Autowired
-    private SecondReceiver secondReceiver;
-
-    @Before
-    public void before() {
-        firstReceiver.clear();
-        secondReceiver.clear();
-    }
+    private AlternativeStringStreamListener alternativeListener;
 
     @Test
     public void shouldSplitMessagesBetweenReceivers() {
-        for (String message : MESSAGES) {
-            sender.send(message);
-        }
+        source.send("test message 1");
+        source.send("test message 2");
 
-        awaitForHandledMessages(firstReceiver, 2);
-        awaitForHandledMessages(secondReceiver, 2);
+        await().atMost(5, SECONDS)
+                .until(() -> listener.getPayloads().size() == 1 && alternativeListener.getPayloads().size() == 1);
 
-        List<Message> messages = firstReceiver.getHandledMessages();
-        messages.addAll(secondReceiver.getHandledMessages());
-
-        Assertions.assertPayload(messages, MESSAGES);
+        List<String> payloads = listener.getPayloads();
+        payloads.addAll(alternativeListener.getPayloads());
+        assertThat(payloads)
+                .contains("test message 1", "test message 2");
     }
-
 }

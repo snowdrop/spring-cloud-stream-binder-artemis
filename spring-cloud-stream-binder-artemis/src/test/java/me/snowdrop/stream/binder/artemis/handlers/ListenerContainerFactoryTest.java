@@ -1,13 +1,12 @@
 package me.snowdrop.stream.binder.artemis.handlers;
 
+import javax.jms.ConnectionFactory;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.jms.listener.AbstractMessageListenerContainer;
-
-import javax.jms.ConnectionFactory;
-import javax.jms.Topic;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -19,9 +18,6 @@ public class ListenerContainerFactoryTest {
     @Mock
     private ConnectionFactory mockConnectionFactory;
 
-    @Mock
-    private Topic mockTopic;
-
     @Before
     public void before() {
         MockitoAnnotations.initMocks(this);
@@ -30,9 +26,10 @@ public class ListenerContainerFactoryTest {
     @Test
     public void shouldGetListenerContainer() {
         ListenerContainerFactory factory = new ListenerContainerFactory(mockConnectionFactory);
-        AbstractMessageListenerContainer container = factory.getListenerContainer(mockTopic, "testSubscription");
+        AbstractMessageListenerContainer container = factory.getListenerContainer("testTopic", "testSubscription");
         assertThat(container.getConnectionFactory()).isEqualTo(mockConnectionFactory);
-        assertThat(container.getDestination()).isEqualTo(mockTopic);
+        assertThat(container.getDestinationName()).isEqualTo("testTopic");
+        assertThat(container.isPubSubDomain()).isTrue();
         assertThat(container.getSubscriptionName()).isEqualTo("testSubscription");
         assertThat(container.isSessionTransacted()).isTrue();
         assertThat(container.isSubscriptionDurable()).isTrue();
