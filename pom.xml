@@ -51,13 +51,9 @@
     <maven-resources-plugin.version>3.0.2</maven-resources-plugin.version>
     <maven-source-plugin.version>2.2.1</maven-source-plugin.version>
 
-    <assertj.version>3.8.0</assertj.version>
-    <awaitility.version>3.0.0</awaitility.version>
-    <junit.version>4.12</junit.version>
-    <spring-boot.version>1.5.12.RELEASE</spring-boot.version>
-    <spring-cloud-stream-dependencies.version>Ditmars.SR3</spring-cloud-stream-dependencies.version>
-    <spring-integration-java-dsl.version>1.2.3.RELEASE</spring-integration-java-dsl.version>
-    <spring-integration-jms.version>4.3.15.RELEASE</spring-integration-jms.version>
+    <awaitility.version>3.1.2</awaitility.version>
+    <spring-boot.version>2.0.3.RELEASE</spring-boot.version>
+    <spring-cloud-stream-dependencies.version>Elmhurst.SR1</spring-cloud-stream-dependencies.version>
   </properties>
 
   <prerequisites>
@@ -99,26 +95,6 @@
         <version>${spring-boot.version}</version>
         <type>pom</type>
         <scope>import</scope>
-      </dependency>
-      <dependency>
-        <groupId>org.springframework.integration</groupId>
-        <artifactId>spring-integration-jms</artifactId>
-        <version>${spring-integration-jms.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.springframework.integration</groupId>
-        <artifactId>spring-integration-java-dsl</artifactId>
-        <version>${spring-integration-java-dsl.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>junit</groupId>
-        <artifactId>junit</artifactId>
-        <version>${junit.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.assertj</groupId>
-        <artifactId>assertj-core</artifactId>
-        <version>${assertj.version}</version>
       </dependency>
       <dependency>
         <groupId>org.awaitility</groupId>

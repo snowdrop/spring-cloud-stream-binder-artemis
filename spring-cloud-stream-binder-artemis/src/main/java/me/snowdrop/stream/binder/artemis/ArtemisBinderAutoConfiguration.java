@@ -16,6 +16,8 @@
 
 package me.snowdrop.stream.binder.artemis;
 
+import javax.jms.ConnectionFactory;
+
 import me.snowdrop.stream.binder.artemis.handlers.ListenerContainerFactory;
 import me.snowdrop.stream.binder.artemis.properties.ArtemisExtendedBindingProperties;
 import me.snowdrop.stream.binder.artemis.provisioning.ArtemisProvisioningProvider;
@@ -26,15 +28,10 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.autoconfigure.jms.artemis.ArtemisAutoConfiguration;
 import org.springframework.boot.autoconfigure.jms.artemis.ArtemisProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.cloud.stream.config.codec.kryo.KryoCodecAutoConfiguration;
 import org.springframework.cloud.stream.provisioning.ProvisioningProvider;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Import;
-import org.springframework.integration.codec.Codec;
 import org.springframework.jms.support.converter.MessagingMessageConverter;
-
-import javax.jms.ConnectionFactory;
 
 /**
  * @author <a href="mailto:gytis@redhat.com">Gytis Trikleris</a>
@@ -43,7 +40,6 @@ import javax.jms.ConnectionFactory;
 @AutoConfigureAfter(ArtemisAutoConfiguration.class)
 @ConditionalOnBean(ActiveMQConnectionFactory.class)
 @EnableConfigurationProperties(ArtemisExtendedBindingProperties.class)
-@Import(KryoCodecAutoConfiguration.class)
 public class ArtemisBinderAutoConfiguration {
 
     @Bean
@@ -61,13 +57,10 @@ public class ArtemisBinderAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean
     ArtemisMessageChannelBinder artemisMessageChannelBinder(ArtemisProvisioningProvider provisioningProvider,
-            ConnectionFactory connectionFactory, ListenerContainerFactory listenerContainerFactory,
-            MessagingMessageConverter messagingMessageConverter, ArtemisExtendedBindingProperties bindingProperties,
-            Codec codec) {
-        ArtemisMessageChannelBinder binder = new ArtemisMessageChannelBinder(provisioningProvider, connectionFactory,
-                listenerContainerFactory, messagingMessageConverter, bindingProperties);
-        binder.setCodec(codec);
-        return binder;
+            ConnectionFactory connectionFactory, MessagingMessageConverter messagingMessageConverter,
+            ArtemisExtendedBindingProperties bindingProperties) {
+        return new ArtemisMessageChannelBinder(provisioningProvider, connectionFactory, messagingMessageConverter,
+                bindingProperties);
     }
 
     @Bean
