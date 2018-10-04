@@ -5,5 +5,5 @@ jobs:
       - image: circleci/openjdk:8-jdk
     steps:
       - checkout
-      - run: ./mvnw integration-test
+      - run: ./mvnw verify
 
