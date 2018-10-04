@@ -20,7 +20,6 @@ import org.springframework.jms.listener.AbstractMessageListenerContainer;
 import org.springframework.jms.listener.DefaultMessageListenerContainer;
 
 import javax.jms.ConnectionFactory;
-import javax.jms.Topic;
 
 /**
  * @author <a href="mailto:gytis@redhat.com">Gytis Trikleris</a>
@@ -33,10 +32,11 @@ public class ListenerContainerFactory {
         this.connectionFactory = connectionFactory;
     }
 
-    public AbstractMessageListenerContainer getListenerContainer(Topic topic, String subscriptionName) {
+    public AbstractMessageListenerContainer getListenerContainer(String topic, String subscriptionName) {
         DefaultMessageListenerContainer listenerContainer = new DefaultMessageListenerContainer();
         listenerContainer.setConnectionFactory(connectionFactory);
-        listenerContainer.setDestination(topic);
+        listenerContainer.setPubSubDomain(true);
+        listenerContainer.setDestinationName(topic);
         listenerContainer.setSubscriptionName(subscriptionName);
         listenerContainer.setSessionTransacted(true);
         listenerContainer.setSubscriptionDurable(true);

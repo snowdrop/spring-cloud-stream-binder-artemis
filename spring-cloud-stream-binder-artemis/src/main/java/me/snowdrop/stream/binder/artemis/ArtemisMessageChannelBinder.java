@@ -16,6 +16,8 @@
 
 package me.snowdrop.stream.binder.artemis;
 
+import javax.jms.ConnectionFactory;
+
 import me.snowdrop.stream.binder.artemis.handlers.ArtemisMessageHandler;
 import me.snowdrop.stream.binder.artemis.handlers.ListenerContainerFactory;
 import me.snowdrop.stream.binder.artemis.properties.ArtemisConsumerProperties;
@@ -29,17 +31,12 @@ import org.springframework.cloud.stream.binder.ExtendedPropertiesBinder;
 import org.springframework.cloud.stream.provisioning.ConsumerDestination;
 import org.springframework.cloud.stream.provisioning.ProducerDestination;
 import org.springframework.integration.core.MessageProducer;
-import org.springframework.integration.dsl.jms.JmsMessageDrivenChannelAdapter;
-import org.springframework.integration.jms.ChannelPublishingJmsMessageListener;
+import org.springframework.integration.jms.dsl.Jms;
 import org.springframework.jms.listener.AbstractMessageListenerContainer;
 import org.springframework.jms.support.converter.MessageConverter;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.MessageHandler;
 import org.springframework.util.StringUtils;
-
-import javax.jms.ConnectionFactory;
-import javax.jms.JMSContext;
-import javax.jms.Topic;
 
 import static me.snowdrop.stream.binder.artemis.common.NamingUtils.getAnonymousQueueName;
 import static me.snowdrop.stream.binder.artemis.common.NamingUtils.getQueueName;
@@ -56,18 +53,15 @@ public class ArtemisMessageChannelBinder extends
 
     private final ConnectionFactory connectionFactory;
 
-    private final ListenerContainerFactory listenerContainerFactory;
-
     private final MessageConverter messageConverter;
 
     private final ArtemisExtendedBindingProperties bindingProperties;
 
     public ArtemisMessageChannelBinder(ArtemisProvisioningProvider provisioningProvider,
-            ConnectionFactory connectionFactory, ListenerContainerFactory listenerContainerFactory,
-            MessageConverter messageConverter, ArtemisExtendedBindingProperties bindingProperties) {
-        super(true, DEFAULT_HEADERS, provisioningProvider);
+            ConnectionFactory connectionFactory, MessageConverter messageConverter,
+            ArtemisExtendedBindingProperties bindingProperties) {
+        super(DEFAULT_HEADERS, provisioningProvider);
         this.connectionFactory = connectionFactory;
-        this.listenerContainerFactory = listenerContainerFactory;
         this.messageConverter = messageConverter;
         this.bindingProperties = bindingProperties;
     }
@@ -76,6 +70,7 @@ public class ArtemisMessageChannelBinder extends
     protected MessageHandler createProducerMessageHandler(ProducerDestination destination,
             ExtendedProducerProperties<ArtemisProducerProperties> properties, MessageChannel errorChannel) {
         // TODO setup an error channel
+
         return new ArtemisMessageHandler(destination, connectionFactory, messageConverter);
     }
 
@@ -83,13 +78,10 @@ public class ArtemisMessageChannelBinder extends
     protected MessageProducer createConsumerEndpoint(ConsumerDestination destination, String group,
             ExtendedConsumerProperties<ArtemisConsumerProperties> properties) {
         String subscriptionName = getSubscriptionName(destination.getName(), group);
-
-        try (JMSContext context = connectionFactory.createContext()) {
-            Topic topic = context.createTopic(destination.getName());
-            AbstractMessageListenerContainer listenerContainer =
-                    listenerContainerFactory.getListenerContainer(topic, subscriptionName);
-            return new JmsMessageDrivenChannelAdapter(listenerContainer, new ChannelPublishingJmsMessageListener());
-        }
+        ListenerContainerFactory listenerContainerFactory = new ListenerContainerFactory(connectionFactory);
+        AbstractMessageListenerContainer listenerContainer =
+                listenerContainerFactory.getListenerContainer(destination.getName(), subscriptionName);
+        return Jms.messageDrivenChannelAdapter(listenerContainer).get();
     }
 
     @Override
