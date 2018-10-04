@@ -17,9 +17,7 @@
 package me.snowdrop.stream.binder.artemis.provisioning;
 
 import java.util.Arrays;
-import java.util.List;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import me.snowdrop.stream.binder.artemis.properties.ArtemisConsumerProperties;
@@ -121,14 +119,13 @@ public class ArtemisProvisioningProvider implements ProvisioningProvider<
         return new ArtemisProducerDestination(address);
     }
 
-    private ArtemisPartitionedProducerDestination provisionPartitionedProducerDestination(String address,
+    private ArtemisProducerDestination provisionPartitionedProducerDestination(String address,
             ProducerProperties properties) {
-        List<String> addresses = IntStream.range(0, properties.getPartitionCount())
+        IntStream.range(0, properties.getPartitionCount())
                 .mapToObj(i -> getPartitionAddress(address, i))
                 .peek(this::createAddress)
-                .peek(partitionAddress -> provisionGroups(partitionAddress, properties.getRequiredGroups()))
-                .collect(Collectors.toList());
-        return new ArtemisPartitionedProducerDestination(addresses);
+                .forEach(partitionAddress -> provisionGroups(partitionAddress, properties.getRequiredGroups()));
+        return new ArtemisProducerDestination(address);
     }
 
     private void provisionGroups(String address, String[] groups) {

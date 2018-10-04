@@ -104,7 +104,7 @@ public class ArtemisProvisioningProviderTest {
 
         ProducerDestination destination = provider.provisionProducerDestination(address, mockProducerProperties);
 
-        assertThat(destination).isInstanceOf(ArtemisPartitionedProducerDestination.class);
+        assertThat(destination).isInstanceOf(ArtemisProducerDestination.class);
         assertThat(destination.getNameForPartition(0)).isEqualTo(partitionedAddress0);
         assertThat(destination.getNameForPartition(1)).isEqualTo(partitionedAddress1);
         verify(mockClientSession).createAddress(toSimpleString(partitionedAddress0), MULTICAST, true);
@@ -122,7 +122,7 @@ public class ArtemisProvisioningProviderTest {
 
         ProducerDestination destination = provider.provisionProducerDestination(address, mockProducerProperties);
 
-        assertThat(destination).isInstanceOf(ArtemisPartitionedProducerDestination.class);
+        assertThat(destination).isInstanceOf(ArtemisProducerDestination.class);
         assertThat(destination.getNameForPartition(0)).isEqualTo(partitionedAddress0);
         assertThat(destination.getNameForPartition(1)).isEqualTo(partitionedAddress1);
         verify(mockClientSession).createAddress(toSimpleString(partitionedAddress0), MULTICAST, true);
