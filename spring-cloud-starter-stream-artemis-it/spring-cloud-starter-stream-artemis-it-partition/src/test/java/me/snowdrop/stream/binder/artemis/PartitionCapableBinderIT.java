@@ -74,6 +74,17 @@ public class PartitionCapableBinderIT extends
     @Autowired
     private ArtemisMessageChannelBinder binder;
 
+    @Test
+    @Override
+    public void testSendAndReceive() throws Exception {
+        System.out.println("=== starting testSendAndReceive");
+        try {
+            super.testSendAndReceive();
+        } finally {
+            System.out.println("=== finished testSendAndReceive");
+        }
+    }
+
     /**
      * Overriding because parent is checking for text/plain type, but default type is application/json in SCS v2
      */
