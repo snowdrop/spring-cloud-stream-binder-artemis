@@ -22,6 +22,7 @@ import java.util.stream.IntStream;
 
 import me.snowdrop.stream.binder.artemis.properties.ArtemisConsumerProperties;
 import me.snowdrop.stream.binder.artemis.properties.ArtemisProducerProperties;
+import org.apache.activemq.artemis.api.core.SimpleString;
 import org.apache.activemq.artemis.api.core.client.ClientSession;
 import org.apache.activemq.artemis.api.core.client.ClientSessionFactory;
 import org.apache.activemq.artemis.api.core.client.ServerLocator;
@@ -137,9 +138,13 @@ public class ArtemisProvisioningProvider implements ProvisioningProvider<
     private void createAddress(String name) {
         logger.fine(String.format("Creating address='%s'", name));
 
+        SimpleString nameString = toSimpleString(name);
+
         try (ClientSessionFactory sessionFactory = serverLocator.createSessionFactory();
              ClientSession session = getClientSession(sessionFactory)) {
-            session.createAddress(toSimpleString(name), MULTICAST, true);
+            if (!session.addressQuery(nameString).isExists()) {
+                session.createAddress(nameString, MULTICAST, true);
+            }
         } catch (Exception e) {
             throw new ProvisioningException(String.format("Failed to create address '%s'", name), e);
         }
@@ -148,9 +153,21 @@ public class ArtemisProvisioningProvider implements ProvisioningProvider<
     private void createQueue(String address, String name) {
         logger.fine(String.format("Creating queue='%s' with address='%s'", name, address));
 
+        SimpleString addressString = toSimpleString(address);
+        SimpleString nameString = toSimpleString(name);
+
         try (ClientSessionFactory sessionFactory = serverLocator.createSessionFactory();
              ClientSession session = getClientSession(sessionFactory)) {
-            session.createSharedQueue(toSimpleString(address), MULTICAST, toSimpleString(name), true);
+            ClientSession.QueueQuery queueQuery = session.queueQuery(nameString);
+            if (!queueQuery.isExists()) {
+                session.createSharedQueue(addressString, MULTICAST, nameString, true);
+            } else if (!addressString.equals(queueQuery.getAddress())) {
+                throw new ProvisioningException(String.format(
+                        "Failed to create queue '%s' with address '%s'. Queue already exists under another address '%s'",
+                        name, address, queueQuery.getAddress()));
+            }
+        } catch (ProvisioningException e) {
+            throw e;
         } catch (Exception e) {
             throw new ProvisioningException(
                     String.format("Failed to create queue '%s' with address '%s'", name, address), e);

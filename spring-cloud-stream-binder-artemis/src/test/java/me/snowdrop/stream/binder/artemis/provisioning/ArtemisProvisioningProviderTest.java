@@ -3,6 +3,7 @@ package me.snowdrop.stream.binder.artemis.provisioning;
 import me.snowdrop.stream.binder.artemis.properties.ArtemisConsumerProperties;
 import me.snowdrop.stream.binder.artemis.properties.ArtemisProducerProperties;
 import org.apache.activemq.artemis.api.core.ActiveMQException;
+import org.apache.activemq.artemis.api.core.RoutingType;
 import org.apache.activemq.artemis.api.core.client.ClientSession;
 import org.apache.activemq.artemis.api.core.client.ClientSessionFactory;
 import org.apache.activemq.artemis.api.core.client.ServerLocator;
@@ -21,6 +22,7 @@ import static org.apache.activemq.artemis.api.core.RoutingType.MULTICAST;
 import static org.apache.activemq.artemis.api.core.SimpleString.toSimpleString;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.eq;
@@ -53,6 +55,12 @@ public class ArtemisProvisioningProviderTest {
     private ClientSession mockClientSession;
 
     @Mock
+    private ClientSession.AddressQuery mockAddressQuery;
+
+    @Mock
+    private ClientSession.QueueQuery mockQueueQuery;
+
+    @Mock
     private ExtendedProducerProperties<ArtemisProducerProperties> mockProducerProperties;
 
     @Mock
@@ -66,6 +74,8 @@ public class ArtemisProvisioningProviderTest {
         when(mockClientSessionFactory.createSession()).thenReturn(mockClientSession);
         when(mockClientSessionFactory.createSession(eq(username), eq(password), anyBoolean(), anyBoolean(),
                 anyBoolean(), anyBoolean(), anyInt())).thenReturn(mockClientSession);
+        when(mockClientSession.addressQuery(any())).thenReturn(mockAddressQuery);
+        when(mockClientSession.queueQuery(any())).thenReturn(mockQueueQuery);
         when(mockProducerProperties.getRequiredGroups()).thenReturn(new String[]{});
         provider = new ArtemisProvisioningProvider(mockServerLocator, null, null);
     }
@@ -221,6 +231,45 @@ public class ArtemisProvisioningProviderTest {
 
         verify(mockClientSessionFactory, times(0)).createSession();
         verify(mockClientSessionFactory).createSession(username, password, true, false, false, true, 10);
+    }
+
+    @Test
+    public void shouldDoNothingIfAddressAlreadyExists() throws ActiveMQException {
+        when(mockAddressQuery.isExists()).thenReturn(true);
+
+        provider.provisionProducerDestination(address, mockProducerProperties);
+
+        verify(mockClientSession).addressQuery(toSimpleString(address));
+        verify(mockClientSession, times(0))
+                .createAddress(any(), any(RoutingType.class), anyBoolean());
+    }
+
+    @Test
+    public void shouldDoNothingIfQueueAlreadyExists() throws ActiveMQException {
+        when(mockProducerProperties.getRequiredGroups()).thenReturn(groups);
+        when(mockQueueQuery.isExists()).thenReturn(true);
+        when(mockQueueQuery.getAddress()).thenReturn(toSimpleString(address));
+
+        provider.provisionProducerDestination(address, mockProducerProperties);
+
+        verify(mockClientSession).queueQuery(toSimpleString(String.format("%s-%s", address, groups[0])));
+        verify(mockClientSession).queueQuery(toSimpleString(String.format("%s-%s", address, groups[1])));
+        verify(mockClientSession, times(0))
+                .createSharedQueue(any(), any(RoutingType.class), any(), anyBoolean());
+    }
+
+    @Test
+    public void shouldFailIfQueueAlreadyExistsUnderDifferentAddress() {
+        when(mockProducerProperties.getRequiredGroups()).thenReturn(groups);
+        when(mockQueueQuery.isExists()).thenReturn(true);
+        when(mockQueueQuery.getAddress()).thenReturn(toSimpleString("another-address"));
+
+        try {
+            provider.provisionProducerDestination(address, mockProducerProperties);
+            fail("Exception was expected");
+        } catch (ProvisioningException e) {
+            assertThat(e.getMessage()).contains("Queue already exists under another address 'another-address'");
+        }
     }
 
 }
