@@ -18,23 +18,23 @@ This project is under development and not all expected features have yet been im
 
 This binder enables Spring Cloud Stream applications to use Apache Artemis message broker as a connection medium. It is transparent to the application code and can be enabled with a Maven dependency and Spring Boot configuration in the same way as any other Spring Cloud Stream binder.
 
-It is compatible with Apache Artemis 1.5.6, Spring Boot 1.5.12.RELEASE and Spring Cloud Stream Ditmars.SR3. For more information on Spring Cloud Stream please refer to its [documentation](https://docs.spring.io/spring-cloud-stream/docs/Chelsea.SR2/reference/htmlsingle).
+It is compatible with Apache Artemis 2.4.0, Spring Boot 2.0.3.RELEASE and Spring Cloud Stream Elmhurst.SR1. For more information on Spring Cloud Stream please refer to its [documentation](https://docs.spring.io/spring-cloud-stream/docs/Elmhurst.SR1/reference/htmlsingle).
 
 # Configuration
 
 ## Artemis broker configuration
 
-This binder depends on Spring Boot Artemis integration to locate Artemis broker. So please refer to its [documentation](https://docs.spring.io/spring-boot/docs/1.5.12.RELEASE/reference/html/boot-features-messaging.html#boot-features-artemis) in order to setup that.
+This binder depends on Spring Boot Artemis integration to locate Artemis broker. So please refer to its [documentation](https://docs.spring.io/spring-boot/docs/2.0.3.RELEASE/reference/html/boot-features-messaging.html#boot-features-artemis) in order to setup that.
 
 ## Spring Cloud Stream configuration
 
-Artemis binder supports Spring Cloud Stream configuration as described in its [documentation](https://docs.spring.io/spring-cloud-stream/docs/Ditmars.SR3/reference/htmlsingle/#_configuration_options).
+Artemis binder supports Spring Cloud Stream configuration as described in its [documentation](https://docs.spring.io/spring-cloud-stream/docs/Elmhurst.SR1/reference/htmlsingle/#_configuration_options).
 
 Note: support for consumer retry has not yet been implemented. Thus, following properties are not supported: `maxAttempts`, `backOffInitialInterval`, `backOffMaxInterval`, `backOffMultiplier`.
 
 # Usage examples
 
-Artemis binder does not impose any other usage requirements from a generic Spring Cloud Stream application. Please refer to a Spring Cloud Stream [documentation](https://docs.spring.io/spring-cloud-stream/docs/Chelsea.SR2/reference/htmlsingle) for a detailed usage explanation.
+Artemis binder does not impose any other usage requirements from a generic Spring Cloud Stream application. Please refer to a Spring Cloud Stream [documentation](https://docs.spring.io/spring-cloud-stream/docs/Elmhurst.SR1/reference/htmlsingle) for a detailed usage explanation.
 
 ## Example applications
 | Name | Description |

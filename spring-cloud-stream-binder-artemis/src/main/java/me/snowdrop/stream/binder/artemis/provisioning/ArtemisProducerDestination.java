@@ -18,6 +18,8 @@ package me.snowdrop.stream.binder.artemis.provisioning;
 
 import org.springframework.cloud.stream.provisioning.ProducerDestination;
 
+import static me.snowdrop.stream.binder.artemis.common.NamingUtils.getPartitionAddress;
+
 /**
  * @author <a href="mailto:gytis@redhat.com">Gytis Trikleris</a>
  */
@@ -36,7 +38,7 @@ public class ArtemisProducerDestination implements ProducerDestination {
 
     @Override
     public String getNameForPartition(int i) {
-        throw new UnsupportedOperationException("This destination is not partitioned");
+        return getPartitionAddress(name, i);
     }
 
     @Override

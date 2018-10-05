@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2017 Red Hat, Inc, and individual contributors.
+ * Copyright 2016-2018 Red Hat, Inc, and individual contributors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,19 +16,20 @@
 
 package me.snowdrop.stream.binder.artemis;
 
-import me.snowdrop.stream.binder.artemis.application.FirstReceiver;
-import me.snowdrop.stream.binder.artemis.application.SecondReceiver;
-import me.snowdrop.stream.binder.artemis.application.Sender;
+import me.snowdrop.stream.binder.artemis.listeners.AlternativeStringStreamListener;
 import me.snowdrop.stream.binder.artemis.application.StreamApplication;
-import org.junit.Before;
+import me.snowdrop.stream.binder.artemis.listeners.StringStreamListener;
+import me.snowdrop.stream.binder.artemis.sources.StringStreamSource;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import static me.snowdrop.stream.binder.artemis.utils.Assertions.assertPayload;
-import static me.snowdrop.stream.binder.artemis.utils.AwaitUtils.awaitForHandledMessages;
+import static java.util.concurrent.TimeUnit.SECONDS;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.awaitility.Awaitility.await;
 
 /**
  * @author <a href="mailto:gytis@redhat.com">Gytis Trikleris</a>
@@ -37,42 +38,36 @@ import static me.snowdrop.stream.binder.artemis.utils.AwaitUtils.awaitForHandled
 @SpringBootTest(
         classes = StreamApplication.class,
         properties = {
-                "spring.cloud.stream.bindings.input.group=testGroup1",
-                "spring.cloud.stream.bindings.alternativeInput.group=testGroup2"
+                "spring.cloud.stream.bindings.output.destination=multiple-groups-destination",
+                "spring.cloud.stream.bindings.input.destination=multiple-groups-destination",
+                "spring.cloud.stream.bindings.alternativeInput.destination=multiple-groups-destination",
+                "spring.cloud.stream.bindings.input.group=group-1",
+                "spring.cloud.stream.bindings.alternativeInput.group=group-2"
         }
 )
+@Import({ StringStreamSource.class, StringStreamListener.class, AlternativeStringStreamListener.class })
 public class MultipleGroupsEndToEndIT {
 
-    private static final String[] MESSAGES = {
-            "Test message 1", "Test message 2", "Test message 3", "Test message 4"
-    };
+    @Autowired
+    private StringStreamSource source;
 
     @Autowired
-    private Sender sender;
+    private StringStreamListener listener;
 
     @Autowired
-    private FirstReceiver firstReceiver;
-
-    @Autowired
-    private SecondReceiver secondReceiver;
-
-    @Before
-    public void before() throws Exception {
-        firstReceiver.clear();
-        secondReceiver.clear();
-    }
+    private AlternativeStringStreamListener alternativeListener;
 
     @Test
     public void shouldReceiveMessageWithAllReceivers() {
-        for (String message : MESSAGES) {
-            sender.send(message);
-        }
+        source.send("test message 1");
+        source.send("test message 2");
 
-        awaitForHandledMessages(firstReceiver, MESSAGES.length);
-        awaitForHandledMessages(secondReceiver, MESSAGES.length);
+        await().atMost(5, SECONDS)
+                .until(() -> listener.getPayloads().size() == 2 && alternativeListener.getPayloads().size() == 2);
 
-        assertPayload(firstReceiver.getHandledMessages(), MESSAGES);
-        assertPayload(secondReceiver.getHandledMessages(), MESSAGES);
+        assertThat(listener.getPayloads())
+                .contains("test message 1", "test message 2");
+        assertThat(alternativeListener.getPayloads())
+                .contains("test message 1", "test message 2");
     }
-
 }

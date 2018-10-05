@@ -2,8 +2,8 @@ package me.snowdrop.stream.binder.artemis.provisioning;
 
 import org.junit.Test;
 
+import static me.snowdrop.stream.binder.artemis.common.NamingUtils.getPartitionAddress;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
 
 /**
  * @author <a href="mailto:gytis@redhat.com">Gytis Trikleris</a>
@@ -18,15 +18,10 @@ public class ArtemisProducerDestinationTest {
     }
 
     @Test
-    public void shouldFailToGetNameForPartition() {
+    public void shouldGetNameForPartition() {
         String name = "test-name";
         ArtemisProducerDestination destination = new ArtemisProducerDestination(name);
-        try {
-            destination.getNameForPartition(0);
-            fail("Exception was expected");
-        } catch (UnsupportedOperationException e) {
-            assertThat(e.getMessage()).isEqualTo("This destination is not partitioned");
-        }
+        assertThat(destination.getNameForPartition(0)).isEqualTo(getPartitionAddress(name, 0));
     }
 
 }

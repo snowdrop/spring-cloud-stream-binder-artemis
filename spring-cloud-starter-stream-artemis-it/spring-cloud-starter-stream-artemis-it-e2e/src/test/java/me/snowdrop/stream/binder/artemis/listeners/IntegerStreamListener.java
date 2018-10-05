@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2017 Red Hat, Inc, and individual contributors.
+ * Copyright 2016-2018 Red Hat, Inc, and individual contributors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,27 +13,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-package me.snowdrop.stream.binder.artemis.application;
+package me.snowdrop.stream.binder.artemis.listeners;
 
 import org.springframework.cloud.stream.annotation.EnableBinding;
 import org.springframework.cloud.stream.annotation.StreamListener;
 import org.springframework.cloud.stream.messaging.Sink;
-import org.springframework.messaging.Message;
 
 /**
  * @author <a href="mailto:gytis@redhat.com">Gytis Trikleris</a>
  */
 @EnableBinding(Sink.class)
-public class FirstReceiver extends AbstractReceiver {
+public class IntegerStreamListener {
 
-    public FirstReceiver() {
-        super("first-receiver");
-    }
+    private int payload;
 
     @StreamListener(Sink.INPUT)
-    public void receive(Message message) {
-        super.receive(message);
+    public void streamListener(Integer payload) {
+        this.payload = payload;
     }
 
+    public int getPayload() {
+        return payload;
+    }
 }
