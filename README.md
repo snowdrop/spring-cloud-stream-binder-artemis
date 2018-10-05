@@ -14,7 +14,7 @@ This project is under development and not all expected features have yet been im
 
 # Overview
 
-[![Build Status](https://travis-ci.org/snowdrop/spring-cloud-stream-binder-artemis.svg?branch=master)](https://travis-ci.org/snowdrop/spring-cloud-stream-binder-artemis)
+[![Build Status](https://circleci.com/gh/snowdrop/spring-cloud-stream-binder-artemis.svg?style=shield)](https://circleci.com/gh/snowdrop/spring-cloud-stream-binder-artemis/tree/master)
 
 This binder enables Spring Cloud Stream applications to use Apache Artemis message broker as a connection medium. It is transparent to the application code and can be enabled with a Maven dependency and Spring Boot configuration in the same way as any other Spring Cloud Stream binder.
 
