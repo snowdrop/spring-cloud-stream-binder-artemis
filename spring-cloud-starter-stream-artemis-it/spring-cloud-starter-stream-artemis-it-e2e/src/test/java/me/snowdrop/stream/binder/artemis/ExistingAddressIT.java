@@ -52,7 +52,7 @@ public class ExistingAddressIT {
     private StringStreamListener listener;
 
     @Test
-    public void shouldSplitMessagesBetweenReceivers() {
+    public void shouldSendAndReceiveMessageThroughExistingAddress() {
         source.send("test message");
 
         await().atMost(5, SECONDS)
