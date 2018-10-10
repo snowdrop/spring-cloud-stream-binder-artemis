@@ -20,6 +20,7 @@ import javax.jms.ConnectionFactory;
 
 import me.snowdrop.stream.binder.artemis.handlers.ArtemisMessageHandler;
 import me.snowdrop.stream.binder.artemis.handlers.ListenerContainerFactory;
+import me.snowdrop.stream.binder.artemis.handlers.RetryableChannelPublishingJmsMessageListener;
 import me.snowdrop.stream.binder.artemis.properties.ArtemisConsumerProperties;
 import me.snowdrop.stream.binder.artemis.properties.ArtemisExtendedBindingProperties;
 import me.snowdrop.stream.binder.artemis.properties.ArtemisProducerProperties;
@@ -31,11 +32,13 @@ import org.springframework.cloud.stream.binder.ExtendedPropertiesBinder;
 import org.springframework.cloud.stream.provisioning.ConsumerDestination;
 import org.springframework.cloud.stream.provisioning.ProducerDestination;
 import org.springframework.integration.core.MessageProducer;
+import org.springframework.integration.jms.JmsMessageDrivenEndpoint;
 import org.springframework.integration.jms.dsl.Jms;
 import org.springframework.jms.listener.AbstractMessageListenerContainer;
 import org.springframework.jms.support.converter.MessageConverter;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.MessageHandler;
+import org.springframework.retry.support.RetryTemplate;
 import org.springframework.util.StringUtils;
 
 import static me.snowdrop.stream.binder.artemis.common.NamingUtils.getAnonymousQueueName;
@@ -79,9 +82,19 @@ public class ArtemisMessageChannelBinder extends
             ExtendedConsumerProperties<ArtemisConsumerProperties> properties) {
         String subscriptionName = getSubscriptionName(destination.getName(), group);
         ListenerContainerFactory listenerContainerFactory = new ListenerContainerFactory(connectionFactory);
-        AbstractMessageListenerContainer listenerContainer =
-                listenerContainerFactory.getListenerContainer(destination.getName(), subscriptionName);
-        return Jms.messageDrivenChannelAdapter(listenerContainer).get();
+        AbstractMessageListenerContainer listenerContainer = listenerContainerFactory
+                .getListenerContainer(destination.getName(), subscriptionName);
+
+        if (properties.getMaxAttempts() == 1) {
+            return Jms.messageDrivenChannelAdapter(listenerContainer).get();
+        }
+
+        RetryTemplate retryTemplate = buildRetryTemplate(properties);
+        ErrorInfrastructure errorInfrastructure = registerErrorInfrastructure(destination, group, properties);
+        RetryableChannelPublishingJmsMessageListener listener =
+                new RetryableChannelPublishingJmsMessageListener(retryTemplate, errorInfrastructure.getRecoverer());
+        listener.setExpectReply(false);
+        return new JmsMessageDrivenEndpoint(listenerContainer, listener);
     }
 
     @Override
@@ -92,6 +105,12 @@ public class ArtemisMessageChannelBinder extends
     @Override
     public ArtemisProducerProperties getExtendedProducerProperties(String channelName) {
         return bindingProperties.getExtendedProducerProperties(channelName);
+    }
+
+    @Override
+    protected String errorsBaseName(ConsumerDestination destination, String group,
+            ExtendedConsumerProperties<ArtemisConsumerProperties> properties) {
+        return getSubscriptionName(destination.getName(), group) + ".errors";
     }
 
     private String getSubscriptionName(String address, String group) {

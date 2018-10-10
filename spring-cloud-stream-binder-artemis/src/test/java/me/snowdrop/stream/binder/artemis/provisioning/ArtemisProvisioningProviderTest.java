@@ -18,6 +18,7 @@ import org.springframework.cloud.stream.provisioning.ConsumerDestination;
 import org.springframework.cloud.stream.provisioning.ProducerDestination;
 import org.springframework.cloud.stream.provisioning.ProvisioningException;
 
+import static me.snowdrop.stream.binder.artemis.common.NamingUtils.getQueueName;
 import static org.apache.activemq.artemis.api.core.RoutingType.MULTICAST;
 import static org.apache.activemq.artemis.api.core.SimpleString.toSimpleString;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -99,9 +100,9 @@ public class ArtemisProvisioningProviderTest {
         assertThat(destination.getName()).isEqualTo(address);
         verify(mockClientSession).createAddress(toSimpleString(address), MULTICAST, true);
         verify(mockClientSession).createSharedQueue(toSimpleString(address), MULTICAST,
-                toSimpleString(String.format("%s-%s", address, groups[0])), true);
+                toSimpleString(getQueueName(address, groups[0])), true);
         verify(mockClientSession).createSharedQueue(toSimpleString(address), MULTICAST,
-                toSimpleString(String.format("%s-%s", address, groups[1])), true);
+                toSimpleString(getQueueName(address, groups[1])), true);
     }
 
     @Test
@@ -138,13 +139,13 @@ public class ArtemisProvisioningProviderTest {
         verify(mockClientSession).createAddress(toSimpleString(partitionedAddress0), MULTICAST, true);
         verify(mockClientSession).createAddress(toSimpleString(partitionedAddress1), MULTICAST, true);
         verify(mockClientSession).createSharedQueue(toSimpleString(partitionedAddress0), MULTICAST,
-                toSimpleString(String.format("%s-%s", partitionedAddress0, groups[0])), true);
+                toSimpleString(getQueueName(partitionedAddress0, groups[0])), true);
         verify(mockClientSession).createSharedQueue(toSimpleString(partitionedAddress0), MULTICAST,
-                toSimpleString(String.format("%s-%s", partitionedAddress0, groups[1])), true);
+                toSimpleString(getQueueName(partitionedAddress0, groups[1])), true);
         verify(mockClientSession).createSharedQueue(toSimpleString(partitionedAddress1), MULTICAST,
-                toSimpleString(String.format("%s-%s", partitionedAddress1, groups[0])), true);
+                toSimpleString(getQueueName(partitionedAddress1, groups[0])), true);
         verify(mockClientSession).createSharedQueue(toSimpleString(partitionedAddress1), MULTICAST,
-                toSimpleString(String.format("%s-%s", partitionedAddress1, groups[1])), true);
+                toSimpleString(getQueueName(partitionedAddress1, groups[1])), true);
     }
 
     @Test
@@ -163,17 +164,17 @@ public class ArtemisProvisioningProviderTest {
     @Test
     public void shouldFailToCreateQueueForProducer() throws ActiveMQException {
         when(mockProducerProperties.getRequiredGroups()).thenReturn(groups);
-        String groupName = String.format("%s-%s", address, groups[0]);
+        String queueName = getQueueName(address, groups[0]);
 
         doThrow(new ActiveMQException("Test exception"))
                 .when(mockClientSession)
-                .createSharedQueue(toSimpleString(address), MULTICAST, toSimpleString(groupName), true);
+                .createSharedQueue(toSimpleString(address), MULTICAST, toSimpleString(queueName), true);
         try {
             provider.provisionProducerDestination(address, mockProducerProperties);
             fail("Exception was expected");
         } catch (ProvisioningException e) {
             assertThat(e.getMessage()).contains(
-                    String.format("Failed to create queue '%s' with address '%s'", groupName, address));
+                    String.format("Failed to create queue '%s' with address '%s'", queueName, address));
         }
     }
 
@@ -252,8 +253,8 @@ public class ArtemisProvisioningProviderTest {
 
         provider.provisionProducerDestination(address, mockProducerProperties);
 
-        verify(mockClientSession).queueQuery(toSimpleString(String.format("%s-%s", address, groups[0])));
-        verify(mockClientSession).queueQuery(toSimpleString(String.format("%s-%s", address, groups[1])));
+        verify(mockClientSession).queueQuery(toSimpleString(getQueueName(address, groups[0])));
+        verify(mockClientSession).queueQuery(toSimpleString(getQueueName(address, groups[1])));
         verify(mockClientSession, times(0))
                 .createSharedQueue(any(), any(RoutingType.class), any(), anyBoolean());
     }
