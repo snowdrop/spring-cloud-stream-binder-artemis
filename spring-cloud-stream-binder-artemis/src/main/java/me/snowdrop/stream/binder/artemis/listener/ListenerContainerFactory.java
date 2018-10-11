@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package me.snowdrop.stream.binder.artemis.handlers;
+package me.snowdrop.stream.binder.artemis.listener;
 
 import org.springframework.jms.listener.AbstractMessageListenerContainer;
 import org.springframework.jms.listener.DefaultMessageListenerContainer;

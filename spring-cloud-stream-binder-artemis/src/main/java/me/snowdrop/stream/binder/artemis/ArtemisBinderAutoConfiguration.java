@@ -18,7 +18,7 @@ package me.snowdrop.stream.binder.artemis;
 
 import javax.jms.ConnectionFactory;
 
-import me.snowdrop.stream.binder.artemis.handlers.ListenerContainerFactory;
+import me.snowdrop.stream.binder.artemis.listener.ListenerContainerFactory;
 import me.snowdrop.stream.binder.artemis.properties.ArtemisExtendedBindingProperties;
 import me.snowdrop.stream.binder.artemis.provisioning.ArtemisProvisioningProvider;
 import org.apache.activemq.artemis.jms.client.ActiveMQConnectionFactory;
@@ -31,7 +31,6 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.cloud.stream.provisioning.ProvisioningProvider;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.jms.support.converter.MessagingMessageConverter;
 
 /**
  * @author <a href="mailto:gytis@redhat.com">Gytis Trikleris</a>
@@ -50,17 +49,9 @@ public class ArtemisBinderAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    MessagingMessageConverter messagingMessageConverter() {
-        return new MessagingMessageConverter();
-    }
-
-    @Bean
-    @ConditionalOnMissingBean
     ArtemisMessageChannelBinder artemisMessageChannelBinder(ArtemisProvisioningProvider provisioningProvider,
-            ConnectionFactory connectionFactory, MessagingMessageConverter messagingMessageConverter,
-            ArtemisExtendedBindingProperties bindingProperties) {
-        return new ArtemisMessageChannelBinder(provisioningProvider, connectionFactory, messagingMessageConverter,
-                bindingProperties);
+            ConnectionFactory connectionFactory, ArtemisExtendedBindingProperties bindingProperties) {
+        return new ArtemisMessageChannelBinder(provisioningProvider, connectionFactory, bindingProperties);
     }
 
     @Bean

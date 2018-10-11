@@ -18,9 +18,8 @@ package me.snowdrop.stream.binder.artemis;
 
 import javax.jms.ConnectionFactory;
 
-import me.snowdrop.stream.binder.artemis.handlers.ArtemisMessageHandler;
-import me.snowdrop.stream.binder.artemis.handlers.ListenerContainerFactory;
-import me.snowdrop.stream.binder.artemis.handlers.RetryableChannelPublishingJmsMessageListener;
+import me.snowdrop.stream.binder.artemis.listener.ListenerContainerFactory;
+import me.snowdrop.stream.binder.artemis.listener.RetryableChannelPublishingJmsMessageListener;
 import me.snowdrop.stream.binder.artemis.properties.ArtemisConsumerProperties;
 import me.snowdrop.stream.binder.artemis.properties.ArtemisExtendedBindingProperties;
 import me.snowdrop.stream.binder.artemis.properties.ArtemisProducerProperties;
@@ -33,9 +32,10 @@ import org.springframework.cloud.stream.provisioning.ConsumerDestination;
 import org.springframework.cloud.stream.provisioning.ProducerDestination;
 import org.springframework.integration.core.MessageProducer;
 import org.springframework.integration.jms.JmsMessageDrivenEndpoint;
+import org.springframework.integration.jms.JmsSendingMessageHandler;
 import org.springframework.integration.jms.dsl.Jms;
 import org.springframework.jms.listener.AbstractMessageListenerContainer;
-import org.springframework.jms.support.converter.MessageConverter;
+import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.MessageHandler;
 import org.springframework.retry.support.RetryTemplate;
@@ -43,6 +43,7 @@ import org.springframework.util.StringUtils;
 
 import static me.snowdrop.stream.binder.artemis.common.NamingUtils.getAnonymousQueueName;
 import static me.snowdrop.stream.binder.artemis.common.NamingUtils.getQueueName;
+import static org.springframework.cloud.stream.binder.BinderHeaders.PARTITION_HEADER;
 
 /**
  * @author <a href="mailto:gytis@redhat.com">Gytis Trikleris</a>
@@ -56,16 +57,12 @@ public class ArtemisMessageChannelBinder extends
 
     private final ConnectionFactory connectionFactory;
 
-    private final MessageConverter messageConverter;
-
     private final ArtemisExtendedBindingProperties bindingProperties;
 
     public ArtemisMessageChannelBinder(ArtemisProvisioningProvider provisioningProvider,
-            ConnectionFactory connectionFactory, MessageConverter messageConverter,
-            ArtemisExtendedBindingProperties bindingProperties) {
+            ConnectionFactory connectionFactory, ArtemisExtendedBindingProperties bindingProperties) {
         super(DEFAULT_HEADERS, provisioningProvider);
         this.connectionFactory = connectionFactory;
-        this.messageConverter = messageConverter;
         this.bindingProperties = bindingProperties;
     }
 
@@ -74,7 +71,14 @@ public class ArtemisMessageChannelBinder extends
             ExtendedProducerProperties<ArtemisProducerProperties> properties, MessageChannel errorChannel) {
         // TODO setup an error channel
 
-        return new ArtemisMessageHandler(destination, connectionFactory, messageConverter);
+        JmsSendingMessageHandler handler = Jms.outboundAdapter(connectionFactory)
+                .destination(m -> getMessageDestination(m, destination))
+                .configureJmsTemplate(t -> t.pubSubDomain(true))
+                .get();
+        handler.setApplicationContext(getApplicationContext());
+        handler.setBeanFactory(getBeanFactory());
+
+        return handler;
     }
 
     @Override
@@ -119,5 +123,22 @@ public class ArtemisMessageChannelBinder extends
         } else {
             return getAnonymousQueueName(address);
         }
+    }
+
+    private String getMessageDestination(Message<?> message, ProducerDestination destination) {
+        Object partition = message.getHeaders()
+                .get(PARTITION_HEADER);
+
+        if (partition == null) {
+            return destination.getName();
+        }
+        if (partition instanceof Integer) {
+            return destination.getNameForPartition((Integer) partition);
+        }
+        if (partition instanceof String) {
+            return destination.getNameForPartition(Integer.valueOf((String) partition));
+        }
+        throw new IllegalArgumentException(
+                String.format("The provided partition '%s' is not a valid format", partition));
     }
 }

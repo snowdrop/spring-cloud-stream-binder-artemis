@@ -324,6 +324,16 @@ public class PartitionCapableBinderIT extends
 
     }
 
+    /**
+     * {@link org.springframework.integration.jms.JmsSendingMessageHandler} doesn't support lifecycle
+     */
+    @Ignore
+    @Test
+    @Override
+    public void testClean() {
+
+    }
+
     @Override
     public Spy spyOn(String name) {
         return null;
