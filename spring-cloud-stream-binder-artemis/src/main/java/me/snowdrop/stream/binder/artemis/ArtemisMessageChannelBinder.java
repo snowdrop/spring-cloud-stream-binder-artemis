@@ -72,8 +72,8 @@ public class ArtemisMessageChannelBinder extends
         // TODO setup an error channel
 
         JmsSendingMessageHandler handler = Jms.outboundAdapter(connectionFactory)
-                .destination(m -> getMessageDestination(m, destination))
-                .configureJmsTemplate(t -> t.pubSubDomain(true))
+                .destination(message -> getMessageDestination(message, destination))
+                .configureJmsTemplate(templateSpec -> templateSpec.pubSubDomain(true))
                 .get();
         handler.setApplicationContext(getApplicationContext());
         handler.setBeanFactory(getBeanFactory());
