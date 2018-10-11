@@ -1,7 +1,6 @@
 package me.snowdrop.stream.binder.artemis;
 
-import me.snowdrop.stream.binder.artemis.handlers.ArtemisMessageHandler;
-import me.snowdrop.stream.binder.artemis.handlers.RetryableChannelPublishingJmsMessageListener;
+import me.snowdrop.stream.binder.artemis.listener.RetryableChannelPublishingJmsMessageListener;
 import me.snowdrop.stream.binder.artemis.properties.ArtemisConsumerProperties;
 import me.snowdrop.stream.binder.artemis.provisioning.ArtemisConsumerDestination;
 import org.junit.Before;
@@ -15,6 +14,7 @@ import org.springframework.context.support.AbstractApplicationContext;
 import org.springframework.integration.core.MessageProducer;
 import org.springframework.integration.jms.ChannelPublishingJmsMessageListener;
 import org.springframework.integration.jms.JmsMessageDrivenEndpoint;
+import org.springframework.integration.jms.JmsSendingMessageHandler;
 import org.springframework.messaging.MessageHandler;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -41,7 +41,7 @@ public class ArtemisMessageChannelBinderTest {
     public void before() {
         given(mockApplicationContext.getBeanFactory()).willReturn(mockBeanFactory);
 
-        binder = new ArtemisMessageChannelBinder(null, null, null, null);
+        binder = new ArtemisMessageChannelBinder(null, null, null);
         binder.setApplicationContext(mockApplicationContext);
     }
 
@@ -49,7 +49,7 @@ public class ArtemisMessageChannelBinderTest {
     public void shouldCreateProducerMessageHandler() {
         MessageHandler handler = binder.createProducerMessageHandler(null, null, null);
 
-        assertThat(handler).isInstanceOf(ArtemisMessageHandler.class);
+        assertThat(handler).isInstanceOf(JmsSendingMessageHandler.class);
     }
 
     @Test

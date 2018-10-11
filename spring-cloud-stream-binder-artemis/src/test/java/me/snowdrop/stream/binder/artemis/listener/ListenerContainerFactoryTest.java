@@ -1,4 +1,4 @@
-package me.snowdrop.stream.binder.artemis.handlers;
+package me.snowdrop.stream.binder.artemis.listener;
 
 import javax.jms.ConnectionFactory;
 
