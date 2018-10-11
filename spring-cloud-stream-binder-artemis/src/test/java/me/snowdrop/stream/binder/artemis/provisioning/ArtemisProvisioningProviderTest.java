@@ -24,13 +24,13 @@ import static org.apache.activemq.artemis.api.core.SimpleString.toSimpleString;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Matchers.anyBoolean;
-import static org.mockito.Matchers.anyInt;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 /**
  * @author <a href="mailto:gytis@redhat.com">Gytis Trikleris</a>
@@ -71,13 +71,13 @@ public class ArtemisProvisioningProviderTest {
 
     @Before
     public void before() throws Exception {
-        when(mockServerLocator.createSessionFactory()).thenReturn(mockClientSessionFactory);
-        when(mockClientSessionFactory.createSession()).thenReturn(mockClientSession);
-        when(mockClientSessionFactory.createSession(eq(username), eq(password), anyBoolean(), anyBoolean(),
-                anyBoolean(), anyBoolean(), anyInt())).thenReturn(mockClientSession);
-        when(mockClientSession.addressQuery(any())).thenReturn(mockAddressQuery);
-        when(mockClientSession.queueQuery(any())).thenReturn(mockQueueQuery);
-        when(mockProducerProperties.getRequiredGroups()).thenReturn(new String[]{});
+        given(mockServerLocator.createSessionFactory()).willReturn(mockClientSessionFactory);
+        given(mockClientSessionFactory.createSession()).willReturn(mockClientSession);
+        given(mockClientSessionFactory.createSession(eq(username), eq(password), anyBoolean(), anyBoolean(),
+                anyBoolean(), anyBoolean(), anyInt())).willReturn(mockClientSession);
+        given(mockClientSession.addressQuery(any())).willReturn(mockAddressQuery);
+        given(mockClientSession.queueQuery(any())).willReturn(mockQueueQuery);
+        given(mockProducerProperties.getRequiredGroups()).willReturn(new String[]{});
         provider = new ArtemisProvisioningProvider(mockServerLocator, null, null);
     }
 
@@ -92,7 +92,7 @@ public class ArtemisProvisioningProviderTest {
 
     @Test
     public void shouldProvisionUnpartitionedProducerWithRequiredGroups() throws ActiveMQException {
-        when(mockProducerProperties.getRequiredGroups()).thenReturn(groups);
+        given(mockProducerProperties.getRequiredGroups()).willReturn(groups);
 
         ProducerDestination destination = provider.provisionProducerDestination(address, mockProducerProperties);
 
@@ -110,8 +110,8 @@ public class ArtemisProvisioningProviderTest {
         String partitionedAddress0 = String.format("%s-0", address);
         String partitionedAddress1 = String.format("%s-1", address);
 
-        when(mockProducerProperties.isPartitioned()).thenReturn(true);
-        when(mockProducerProperties.getPartitionCount()).thenReturn(2);
+        given(mockProducerProperties.isPartitioned()).willReturn(true);
+        given(mockProducerProperties.getPartitionCount()).willReturn(2);
 
         ProducerDestination destination = provider.provisionProducerDestination(address, mockProducerProperties);
 
@@ -127,9 +127,9 @@ public class ArtemisProvisioningProviderTest {
         String partitionedAddress0 = String.format("%s-0", address);
         String partitionedAddress1 = String.format("%s-1", address);
 
-        when(mockProducerProperties.getRequiredGroups()).thenReturn(groups);
-        when(mockProducerProperties.isPartitioned()).thenReturn(true);
-        when(mockProducerProperties.getPartitionCount()).thenReturn(2);
+        given(mockProducerProperties.getRequiredGroups()).willReturn(groups);
+        given(mockProducerProperties.isPartitioned()).willReturn(true);
+        given(mockProducerProperties.getPartitionCount()).willReturn(2);
 
         ProducerDestination destination = provider.provisionProducerDestination(address, mockProducerProperties);
 
@@ -163,7 +163,7 @@ public class ArtemisProvisioningProviderTest {
 
     @Test
     public void shouldFailToCreateQueueForProducer() throws ActiveMQException {
-        when(mockProducerProperties.getRequiredGroups()).thenReturn(groups);
+        given(mockProducerProperties.getRequiredGroups()).willReturn(groups);
         String queueName = getQueueName(address, groups[0]);
 
         doThrow(new ActiveMQException("Test exception"))
@@ -190,8 +190,8 @@ public class ArtemisProvisioningProviderTest {
 
     @Test
     public void shouldProvisionPartitionedConsumer() throws ActiveMQException {
-        when(mockConsumerProperties.isPartitioned()).thenReturn(true);
-        when(mockConsumerProperties.getInstanceIndex()).thenReturn(0);
+        given(mockConsumerProperties.isPartitioned()).willReturn(true);
+        given(mockConsumerProperties.getInstanceIndex()).willReturn(0);
 
         ConsumerDestination destination =
                 provider.provisionConsumerDestination(address, null, mockConsumerProperties);
@@ -224,8 +224,8 @@ public class ArtemisProvisioningProviderTest {
 
     @Test
     public void shouldAuthenticateWhenProvisioning() throws ActiveMQException {
-        when(mockServerLocator.isPreAcknowledge()).thenReturn(true);
-        when(mockServerLocator.getAckBatchSize()).thenReturn(10);
+        given(mockServerLocator.isPreAcknowledge()).willReturn(true);
+        given(mockServerLocator.getAckBatchSize()).willReturn(10);
 
         provider = new ArtemisProvisioningProvider(mockServerLocator, username, password);
         provider.provisionConsumerDestination(address, groups[0], mockConsumerProperties);
@@ -236,7 +236,7 @@ public class ArtemisProvisioningProviderTest {
 
     @Test
     public void shouldDoNothingIfAddressAlreadyExists() throws ActiveMQException {
-        when(mockAddressQuery.isExists()).thenReturn(true);
+        given(mockAddressQuery.isExists()).willReturn(true);
 
         provider.provisionProducerDestination(address, mockProducerProperties);
 
@@ -247,9 +247,9 @@ public class ArtemisProvisioningProviderTest {
 
     @Test
     public void shouldDoNothingIfQueueAlreadyExists() throws ActiveMQException {
-        when(mockProducerProperties.getRequiredGroups()).thenReturn(groups);
-        when(mockQueueQuery.isExists()).thenReturn(true);
-        when(mockQueueQuery.getAddress()).thenReturn(toSimpleString(address));
+        given(mockProducerProperties.getRequiredGroups()).willReturn(groups);
+        given(mockQueueQuery.isExists()).willReturn(true);
+        given(mockQueueQuery.getAddress()).willReturn(toSimpleString(address));
 
         provider.provisionProducerDestination(address, mockProducerProperties);
 
@@ -261,9 +261,9 @@ public class ArtemisProvisioningProviderTest {
 
     @Test
     public void shouldFailIfQueueAlreadyExistsUnderDifferentAddress() {
-        when(mockProducerProperties.getRequiredGroups()).thenReturn(groups);
-        when(mockQueueQuery.isExists()).thenReturn(true);
-        when(mockQueueQuery.getAddress()).thenReturn(toSimpleString("another-address"));
+        given(mockProducerProperties.getRequiredGroups()).willReturn(groups);
+        given(mockQueueQuery.isExists()).willReturn(true);
+        given(mockQueueQuery.getAddress()).willReturn(toSimpleString("another-address"));
 
         try {
             provider.provisionProducerDestination(address, mockProducerProperties);
