@@ -69,8 +69,6 @@ public class ArtemisMessageChannelBinder extends
     @Override
     protected MessageHandler createProducerMessageHandler(ProducerDestination destination,
             ExtendedProducerProperties<ArtemisProducerProperties> properties, MessageChannel errorChannel) {
-        // TODO setup an error channel
-
         JmsSendingMessageHandler handler = Jms.outboundAdapter(connectionFactory)
                 .destination(message -> getMessageDestination(message, destination))
                 .configureJmsTemplate(templateSpec -> templateSpec.pubSubDomain(true))
