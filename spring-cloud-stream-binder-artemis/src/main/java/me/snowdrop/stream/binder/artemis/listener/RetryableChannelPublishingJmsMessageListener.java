@@ -16,7 +16,9 @@
 
 package me.snowdrop.stream.binder.artemis.listener;
 
+import javax.jms.BytesMessage;
 import javax.jms.JMSException;
+import javax.jms.Message;
 import javax.jms.Session;
 
 import org.springframework.integration.jms.ChannelPublishingJmsMessageListener;
@@ -39,9 +41,13 @@ public class RetryableChannelPublishingJmsMessageListener extends ChannelPublish
     }
 
     @Override
-    public void onMessage(javax.jms.Message jmsMessage, Session session) throws JMSException {
+    public void onMessage(Message message, Session session) throws JMSException {
         retryTemplate.execute(c -> {
-            super.onMessage(jmsMessage, session);
+            if (message instanceof BytesMessage) {
+                // Make sure byte message is readable in every iteration.
+                ((BytesMessage) message).reset();
+            }
+            super.onMessage(message, session);
             return null;
         }, recoveryCallback);
     }

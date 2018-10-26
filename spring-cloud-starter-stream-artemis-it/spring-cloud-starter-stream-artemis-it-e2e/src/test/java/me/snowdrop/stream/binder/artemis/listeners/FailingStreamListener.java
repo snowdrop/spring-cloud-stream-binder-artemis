@@ -1,5 +1,7 @@
 package me.snowdrop.stream.binder.artemis.listeners;
 
+import java.util.LinkedList;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.springframework.cloud.stream.annotation.EnableBinding;
@@ -11,23 +13,23 @@ import org.springframework.messaging.Message;
 @EnableBinding(Sink.class)
 public class FailingStreamListener {
 
-    private AtomicInteger invocationsCounter = new AtomicInteger();
+    private final List<String> receivedMessages = new LinkedList<>();
 
-    private AtomicInteger errorsCounter = new AtomicInteger();
+    private final AtomicInteger errorsCounter = new AtomicInteger();
 
     @StreamListener(Sink.INPUT)
     public void streamListener(String payload) {
-        invocationsCounter.incrementAndGet();
+        receivedMessages.add(payload);
         throw new RuntimeException("test");
     }
 
     @ServiceActivator(inputChannel = "failing-destination-failing-group.errors")
-    public void error(Message<?> message) {
+    public void errorListener(Message<?> message) {
         errorsCounter.incrementAndGet();
     }
 
-    public int getInvocationsCounter() {
-        return invocationsCounter.get();
+    public List<String> getReceivedMessages() {
+        return receivedMessages;
     }
 
     public int getErrorsCounter() {

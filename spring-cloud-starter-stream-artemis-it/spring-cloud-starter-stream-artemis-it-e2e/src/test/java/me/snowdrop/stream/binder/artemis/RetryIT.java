@@ -43,7 +43,9 @@ public class RetryIT {
         await().atMost(5, SECONDS)
                 .until(listener::getErrorsCounter, is(equalTo(1)));
 
-        assertThat(listener.getInvocationsCounter()).isEqualTo(3);
+        assertThat(listener.getReceivedMessages())
+                .hasSize(3)
+                .containsOnly("test message");
     }
 
 }
