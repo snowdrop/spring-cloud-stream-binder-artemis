@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2017 Red Hat, Inc, and individual contributors.
+ * Copyright 2016-2018 Red Hat, Inc, and individual contributors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,18 +17,12 @@
 package me.snowdrop.stream.binder.artemis.provisioning;
 
 import java.util.Arrays;
-import java.util.logging.Logger;
 import java.util.stream.IntStream;
 
 import me.snowdrop.stream.binder.artemis.properties.ArtemisConsumerProperties;
 import me.snowdrop.stream.binder.artemis.properties.ArtemisProducerProperties;
-import org.apache.activemq.artemis.api.core.SimpleString;
-import org.apache.activemq.artemis.api.core.client.ClientSession;
-import org.apache.activemq.artemis.api.core.client.ClientSessionFactory;
-import org.apache.activemq.artemis.api.core.client.ServerLocator;
 import org.springframework.cloud.stream.binder.ExtendedConsumerProperties;
 import org.springframework.cloud.stream.binder.ExtendedProducerProperties;
-import org.springframework.cloud.stream.binder.ProducerProperties;
 import org.springframework.cloud.stream.provisioning.ConsumerDestination;
 import org.springframework.cloud.stream.provisioning.ProducerDestination;
 import org.springframework.cloud.stream.provisioning.ProvisioningException;
@@ -36,8 +30,6 @@ import org.springframework.cloud.stream.provisioning.ProvisioningProvider;
 
 import static me.snowdrop.stream.binder.artemis.common.NamingUtils.getPartitionAddress;
 import static me.snowdrop.stream.binder.artemis.common.NamingUtils.getQueueName;
-import static org.apache.activemq.artemis.api.core.RoutingType.MULTICAST;
-import static org.apache.activemq.artemis.api.core.SimpleString.toSimpleString;
 
 /**
  * @author <a href="mailto:gytis@redhat.com">Gytis Trikleris</a>
@@ -45,18 +37,10 @@ import static org.apache.activemq.artemis.api.core.SimpleString.toSimpleString;
 public class ArtemisProvisioningProvider implements ProvisioningProvider<
         ExtendedConsumerProperties<ArtemisConsumerProperties>, ExtendedProducerProperties<ArtemisProducerProperties>> {
 
-    private final Logger logger = Logger.getLogger(ArtemisProvisioningProvider.class.getName());
+    private final ArtemisBrokerManager artemisBrokerManager;
 
-    private final ServerLocator serverLocator;
-
-    private final String username;
-
-    private final String password;
-
-    public ArtemisProvisioningProvider(ServerLocator serverLocator, String username, String password) {
-        this.serverLocator = serverLocator;
-        this.username = username;
-        this.password = password;
+    public ArtemisProvisioningProvider(ArtemisBrokerManager artemisBrokerManager) {
+        this.artemisBrokerManager = artemisBrokerManager;
     }
 
     /**
@@ -106,25 +90,25 @@ public class ArtemisProvisioningProvider implements ProvisioningProvider<
             destination = new ArtemisConsumerDestination(address);
         }
 
-        createAddress(destination.getName());
+        artemisBrokerManager.createAddress(destination.getName(), properties.getExtension());
 
         return destination;
     }
 
     private ArtemisProducerDestination provisionUnpartitionedProducerDestination(String address,
-            ProducerProperties properties) {
+            ExtendedProducerProperties<ArtemisProducerProperties> properties) {
         // Create address to send messages to
-        createAddress(address);
+        artemisBrokerManager.createAddress(address, properties.getExtension());
         // Create queues for each group so that messages could be persisted until consumer register
         provisionGroups(address, properties.getRequiredGroups());
         return new ArtemisProducerDestination(address);
     }
 
     private ArtemisProducerDestination provisionPartitionedProducerDestination(String address,
-            ProducerProperties properties) {
+            ExtendedProducerProperties<ArtemisProducerProperties> properties) {
         IntStream.range(0, properties.getPartitionCount())
                 .mapToObj(i -> getPartitionAddress(address, i))
-                .peek(this::createAddress)
+                .peek(partitionAddress -> artemisBrokerManager.createAddress(partitionAddress, properties.getExtension()))
                 .forEach(partitionAddress -> provisionGroups(partitionAddress, properties.getRequiredGroups()));
         return new ArtemisProducerDestination(address);
     }
@@ -132,55 +116,7 @@ public class ArtemisProvisioningProvider implements ProvisioningProvider<
     private void provisionGroups(String address, String[] groups) {
         Arrays.stream(groups)
                 .map(group -> getQueueName(address, group))
-                .forEach(queueName -> createQueue(address, queueName));
-    }
-
-    private void createAddress(String name) {
-        logger.fine(String.format("Creating address='%s'", name));
-
-        SimpleString nameString = toSimpleString(name);
-
-        try (ClientSessionFactory sessionFactory = serverLocator.createSessionFactory();
-             ClientSession session = getClientSession(sessionFactory)) {
-            if (!session.addressQuery(nameString).isExists()) {
-                session.createAddress(nameString, MULTICAST, true);
-            }
-        } catch (Exception e) {
-            throw new ProvisioningException(String.format("Failed to create address '%s'", name), e);
-        }
-    }
-
-    private void createQueue(String address, String name) {
-        logger.fine(String.format("Creating queue='%s' with address='%s'", name, address));
-
-        SimpleString addressString = toSimpleString(address);
-        SimpleString nameString = toSimpleString(name);
-
-        try (ClientSessionFactory sessionFactory = serverLocator.createSessionFactory();
-             ClientSession session = getClientSession(sessionFactory)) {
-            ClientSession.QueueQuery queueQuery = session.queueQuery(nameString);
-            if (!queueQuery.isExists()) {
-                session.createSharedQueue(addressString, MULTICAST, nameString, true);
-            } else if (!addressString.equals(queueQuery.getAddress())) {
-                throw new ProvisioningException(String.format(
-                        "Failed to create queue '%s' with address '%s'. Queue already exists under another address '%s'",
-                        name, address, queueQuery.getAddress()));
-            }
-        } catch (ProvisioningException e) {
-            throw e;
-        } catch (Exception e) {
-            throw new ProvisioningException(
-                    String.format("Failed to create queue '%s' with address '%s'", name, address), e);
-        }
-    }
-
-    private ClientSession getClientSession(ClientSessionFactory clientSessionFactory) throws Exception {
-        if (username == null) {
-            return clientSessionFactory.createSession();
-        }
-
-        return clientSessionFactory.createSession(username, password, true, false, false,
-                serverLocator.isPreAcknowledge(), serverLocator.getAckBatchSize());
+                .forEach(queueName -> artemisBrokerManager.createQueue(address, queueName));
     }
 
 }
