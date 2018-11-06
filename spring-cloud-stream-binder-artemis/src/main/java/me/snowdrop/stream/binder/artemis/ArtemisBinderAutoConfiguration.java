@@ -20,6 +20,7 @@ import javax.jms.ConnectionFactory;
 
 import me.snowdrop.stream.binder.artemis.listener.ListenerContainerFactory;
 import me.snowdrop.stream.binder.artemis.properties.ArtemisExtendedBindingProperties;
+import me.snowdrop.stream.binder.artemis.provisioning.ArtemisBrokerManager;
 import me.snowdrop.stream.binder.artemis.provisioning.ArtemisProvisioningProvider;
 import org.apache.activemq.artemis.jms.client.ActiveMQConnectionFactory;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
@@ -55,11 +56,17 @@ public class ArtemisBinderAutoConfiguration {
     }
 
     @Bean
-    @ConditionalOnMissingBean(ProvisioningProvider.class)
-    ArtemisProvisioningProvider provisioningProvider(ActiveMQConnectionFactory connectionFactory,
+    @ConditionalOnMissingBean
+    ArtemisBrokerManager artemisBrokerManager(ActiveMQConnectionFactory connectionFactory,
             ArtemisProperties artemisProperties) {
-        return new ArtemisProvisioningProvider(connectionFactory.getServerLocator(), artemisProperties.getUser(),
+        return new ArtemisBrokerManager(connectionFactory.getServerLocator(), artemisProperties.getHost(),
                 artemisProperties.getPassword());
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(ProvisioningProvider.class)
+    ArtemisProvisioningProvider provisioningProvider(ArtemisBrokerManager artemisBrokerManager) {
+        return new ArtemisProvisioningProvider(artemisBrokerManager);
     }
 
 }
