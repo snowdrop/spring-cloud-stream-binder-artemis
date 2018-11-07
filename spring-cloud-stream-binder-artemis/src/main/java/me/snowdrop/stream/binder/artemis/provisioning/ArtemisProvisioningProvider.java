@@ -21,6 +21,8 @@ import java.util.stream.IntStream;
 
 import me.snowdrop.stream.binder.artemis.properties.ArtemisConsumerProperties;
 import me.snowdrop.stream.binder.artemis.properties.ArtemisProducerProperties;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.cloud.stream.binder.ExtendedConsumerProperties;
 import org.springframework.cloud.stream.binder.ExtendedProducerProperties;
 import org.springframework.cloud.stream.provisioning.ConsumerDestination;
@@ -36,6 +38,8 @@ import static me.snowdrop.stream.binder.artemis.common.NamingUtils.getQueueName;
  */
 public class ArtemisProvisioningProvider implements ProvisioningProvider<
         ExtendedConsumerProperties<ArtemisConsumerProperties>, ExtendedProducerProperties<ArtemisProducerProperties>> {
+
+    private final Logger logger = LoggerFactory.getLogger(ArtemisProvisioningProvider.class);
 
     private final ArtemisBrokerManager artemisBrokerManager;
 
@@ -85,8 +89,11 @@ public class ArtemisProvisioningProvider implements ProvisioningProvider<
         ArtemisConsumerDestination destination;
 
         if (properties.isPartitioned()) {
+            logger.debug("Provisioning partitioned consumer destination with address '{}' and instance index '{}'",
+                    address, properties.getInstanceIndex());
             destination = new ArtemisConsumerDestination(getPartitionAddress(address, properties.getInstanceIndex()));
         } else {
+            logger.debug("Provisioning unpartitioned consumer destination with address '{}'", address);
             destination = new ArtemisConsumerDestination(address);
         }
 
@@ -97,6 +104,8 @@ public class ArtemisProvisioningProvider implements ProvisioningProvider<
 
     private ArtemisProducerDestination provisionUnpartitionedProducerDestination(String address,
             ExtendedProducerProperties<ArtemisProducerProperties> properties) {
+        logger.debug("Provisioning unpartitioned producer destination with address '{}'", address);
+
         // Create address to send messages to
         artemisBrokerManager.createAddress(address, properties.getExtension());
         // Create queues for each group so that messages could be persisted until consumer register
@@ -106,14 +115,20 @@ public class ArtemisProvisioningProvider implements ProvisioningProvider<
 
     private ArtemisProducerDestination provisionPartitionedProducerDestination(String address,
             ExtendedProducerProperties<ArtemisProducerProperties> properties) {
+        logger.debug("Provisioning partitioned producer destination with address '{}' and '{}' partitions", address,
+                properties.getPartitionCount());
+
         IntStream.range(0, properties.getPartitionCount())
                 .mapToObj(i -> getPartitionAddress(address, i))
-                .peek(partitionAddress -> artemisBrokerManager.createAddress(partitionAddress, properties.getExtension()))
+                .peek(partitionAddress -> artemisBrokerManager.createAddress(partitionAddress,
+                        properties.getExtension()))
                 .forEach(partitionAddress -> provisionGroups(partitionAddress, properties.getRequiredGroups()));
         return new ArtemisProducerDestination(address);
     }
 
     private void provisionGroups(String address, String[] groups) {
+        logger.debug("Provisioning required groups '{}' at address '{}'", groups, address);
+
         Arrays.stream(groups)
                 .map(group -> getQueueName(address, group))
                 .forEach(queueName -> artemisBrokerManager.createQueue(address, queueName));

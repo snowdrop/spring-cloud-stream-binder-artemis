@@ -16,8 +16,6 @@
 
 package me.snowdrop.stream.binder.artemis.provisioning;
 
-import java.util.logging.Logger;
-
 import me.snowdrop.stream.binder.artemis.properties.ArtemisCommonProperties;
 import org.apache.activemq.artemis.api.core.ActiveMQException;
 import org.apache.activemq.artemis.api.core.RoutingType;
@@ -30,6 +28,8 @@ import org.apache.activemq.artemis.api.core.client.ServerLocator;
 import org.apache.activemq.artemis.api.core.management.AddressSettingsInfo;
 import org.apache.activemq.artemis.api.core.management.ManagementHelper;
 import org.apache.activemq.artemis.api.core.management.ResourceNames;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.cloud.stream.provisioning.ProvisioningException;
 
 /**
@@ -45,7 +45,7 @@ public class ArtemisBrokerManager {
 
     private static final String GET_SETTINGS_OPERATION = "getAddressSettingsAsJSON";
 
-    private final Logger logger = Logger.getLogger(ArtemisProvisioningProvider.class.getName());
+    private final Logger logger = LoggerFactory.getLogger(ArtemisProvisioningProvider.class);
 
     private final ServerLocator serverLocator;
 
@@ -68,7 +68,7 @@ public class ArtemisBrokerManager {
      * @throws ProvisioningException if address creation fails for some reason.
      */
     public void createAddress(String name, ArtemisCommonProperties properties) {
-        logger.fine(String.format("Creating address='%s'", name));
+        logger.debug("Creating address '{}'", name);
 
         SimpleString nameString = SimpleString.toSimpleString(name);
 
@@ -80,6 +80,8 @@ public class ArtemisBrokerManager {
                 if (properties.isModifyAddressSettings()) {
                     configureAddress(session, name, properties);
                 }
+            } else {
+                logger.debug("Address '{}' already exists, ignoring", name);
             }
             session.stop();
         } catch (Exception e) {
@@ -109,7 +111,7 @@ public class ArtemisBrokerManager {
     }
 
     private void createQueueInternal(ClientSession session, String address, String name) throws ActiveMQException {
-        logger.fine(String.format("Creating queue='%s' with address='%s'", name, address));
+        logger.debug("Creating queue '{}' with address '{}", name, address);
 
         SimpleString addressString = SimpleString.toSimpleString(address);
         SimpleString nameString = SimpleString.toSimpleString(name);
@@ -117,9 +119,12 @@ public class ArtemisBrokerManager {
         if (!queueQuery.isExists()) {
             session.createSharedQueue(addressString, RoutingType.MULTICAST, nameString, true);
         } else if (!addressString.equals(queueQuery.getAddress())) {
+            logger.debug("Queue '{}' already exists under another address '{}', failing", name, queueQuery.getAddress());
             throw new ProvisioningException(String.format(
                     "Failed to create queue '%s' with address '%s'. Queue already exists under another address '%s'",
                     name, address, queueQuery.getAddress()));
+        } else {
+            logger.debug("Queue '{}' already exists, ignoring");
         }
     }
 
@@ -140,6 +145,8 @@ public class ArtemisBrokerManager {
 
     private void updateAddressSettings(ClientSession session, String address, ArtemisCommonProperties properties)
             throws Exception {
+        logger.debug("Updating address '{}' settings", address);
+
         try (ClientRequestor requestor = new ClientRequestor(session, properties.getManagementAddress())) {
             AddressSettingsInfo currentSettings = getCurrentAddressSettings(session, requestor, address);
             ClientMessage request = session.createMessage(false);

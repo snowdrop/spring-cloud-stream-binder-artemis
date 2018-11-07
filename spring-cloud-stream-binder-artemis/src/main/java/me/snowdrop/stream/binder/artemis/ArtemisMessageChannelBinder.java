@@ -24,6 +24,8 @@ import me.snowdrop.stream.binder.artemis.properties.ArtemisConsumerProperties;
 import me.snowdrop.stream.binder.artemis.properties.ArtemisExtendedBindingProperties;
 import me.snowdrop.stream.binder.artemis.properties.ArtemisProducerProperties;
 import me.snowdrop.stream.binder.artemis.provisioning.ArtemisProvisioningProvider;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.cloud.stream.binder.AbstractMessageChannelBinder;
 import org.springframework.cloud.stream.binder.ExtendedConsumerProperties;
 import org.springframework.cloud.stream.binder.ExtendedProducerProperties;
@@ -55,6 +57,8 @@ public class ArtemisMessageChannelBinder extends
 
     private static final String[] DEFAULT_HEADERS = new String[0];
 
+    private final Logger logger = LoggerFactory.getLogger(ArtemisMessageChannelBinder.class);
+
     private final ConnectionFactory connectionFactory;
 
     private final ArtemisExtendedBindingProperties bindingProperties;
@@ -69,6 +73,8 @@ public class ArtemisMessageChannelBinder extends
     @Override
     protected MessageHandler createProducerMessageHandler(ProducerDestination destination,
             ExtendedProducerProperties<ArtemisProducerProperties> properties, MessageChannel errorChannel) {
+        logger.debug("Creating producer message handler for '{}'", destination);
+
         JmsSendingMessageHandler handler = Jms.outboundAdapter(connectionFactory)
                 .destination(message -> getMessageDestination(message, destination))
                 .configureJmsTemplate(templateSpec -> templateSpec.pubSubDomain(true))
@@ -82,6 +88,8 @@ public class ArtemisMessageChannelBinder extends
     @Override
     protected MessageProducer createConsumerEndpoint(ConsumerDestination destination, String group,
             ExtendedConsumerProperties<ArtemisConsumerProperties> properties) {
+        logger.debug("Creating consumer endpoint for '{}' with a group '{}'", destination, group);
+
         String subscriptionName = getSubscriptionName(destination.getName(), group);
         ListenerContainerFactory listenerContainerFactory = new ListenerContainerFactory(connectionFactory);
         AbstractMessageListenerContainer listenerContainer = listenerContainerFactory
