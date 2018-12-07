@@ -59,7 +59,7 @@ public class ArtemisBinderAutoConfiguration {
     @ConditionalOnMissingBean
     ArtemisBrokerManager artemisBrokerManager(ActiveMQConnectionFactory connectionFactory,
             ArtemisProperties artemisProperties) {
-        return new ArtemisBrokerManager(connectionFactory.getServerLocator(), artemisProperties.getHost(),
+        return new ArtemisBrokerManager(connectionFactory.getServerLocator(), artemisProperties.getUser(),
                 artemisProperties.getPassword());
     }
 
