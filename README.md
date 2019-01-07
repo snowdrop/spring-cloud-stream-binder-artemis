@@ -4,42 +4,82 @@
 - [Overview](#overview)
 - [Configuration](#configuration)
 - [Usage examples](#usage-examples)
+- [Notes on implementation details](#notes-on-implementation-details)
 - [Building and testing the project](#building-and-testing-the-project)
 - [Contributing](#contributing)
 - [Releasing](#releasing)
 
 # Notice
 
-This project is under development and not all expected features have yet been implemented. So, please, use with caution.
+This project is under development and not all expected features have yet been implemented.
+So, please, use with caution.
 
 # Overview
 
 [![Build Status](https://circleci.com/gh/snowdrop/spring-cloud-stream-binder-artemis.svg?style=shield)](https://circleci.com/gh/snowdrop/spring-cloud-stream-binder-artemis/tree/master)
 
-This binder enables Spring Cloud Stream applications to use Apache Artemis message broker as a connection medium. It is transparent to the application code and can be enabled with a Maven dependency and Spring Boot configuration in the same way as any other Spring Cloud Stream binder.
+This binder enables Spring Cloud Stream applications to use Apache Artemis message broker as a connection medium.
+It is transparent to the application code and can be enabled with a Maven dependency and Spring Boot configuration in the same way as any other Spring Cloud Stream binder.
 
-It is compatible with Apache Artemis 2.4.0, Spring Boot 2.0.3.RELEASE and Spring Cloud Stream Elmhurst.SR1. For more information on Spring Cloud Stream please refer to its [documentation](https://docs.spring.io/spring-cloud-stream/docs/Elmhurst.SR1/reference/htmlsingle).
+It is compatible with Apache Artemis 2.4.0, Spring Boot 2.0.7.RELEASE and Spring Cloud Stream Elmhurst.SR2.
+For more information on Spring Cloud Stream please refer to its [documentation](https://docs.spring.io/spring-cloud-stream/docs/Elmhurst.SR2/reference/htmlsingle).
 
 # Configuration
 
 ## Artemis broker configuration
 
-This binder depends on Spring Boot Artemis integration to locate Artemis broker. So please refer to its [documentation](https://docs.spring.io/spring-boot/docs/2.0.3.RELEASE/reference/html/boot-features-messaging.html#boot-features-artemis) in order to setup that.
+This binder depends on Spring Boot Artemis integration to locate Artemis broker.
+So please refer to its [documentation](https://docs.spring.io/spring-boot/docs/2.0.7.RELEASE/reference/html/boot-features-messaging.html#boot-features-artemis) in order to setup that.
 
 ## Spring Cloud Stream configuration
 
-Artemis binder supports Spring Cloud Stream configuration as described in its [documentation](https://docs.spring.io/spring-cloud-stream/docs/Elmhurst.SR1/reference/htmlsingle/#_configuration_options).
+Artemis binder supports Spring Cloud Stream configuration as described in its [documentation](https://docs.spring.io/spring-cloud-stream/docs/Elmhurst.SR2/reference/htmlsingle/#_configuration_options).
 
-Note: support for consumer retry has not yet been implemented. Thus, following properties are not supported: `maxAttempts`, `backOffInitialInterval`, `backOffMaxInterval`, `backOffMultiplier`.
+## Artemis address configuration
+
+For each configured destination Artemis address is created using default broker address settings.
+Following properties can be used to override them for addresses created by this binder assuming broker the user has management permissions.
+
+| Property | Description | Default value |
+| -------- | ----------- | ------------- |
+| modifyAddressSettings | Whether binder should modify address settings for addresses it's creating | false |
+| managementAddress | Broker management address  | activemq.management |
+| autoBindDeadLetterAddress | Whether binder should create a dead letter address for each destination | false |
+| autoBindExpiryAddress | Whether binder should create an expiry address for each destination  | false |
+| brokerExpiryDelay | Message expiration time override (-1 don't override) | -1 |
+| brokerRedeliveryDelay | Time to redeliver a message (in ms) | 0 |
+| brokerMaxRedeliveryDelay | Max value for the redeliveryDelay | brokerRedeliveryDelay * 10 |
+| brokerRedeliveryDelayMultiplier | Multiplier to apply to the redeliveryDelay | 1.0 |
+| brokerMaxDeliveryAttempts | Number of retries before dead letter address | 10 |
+| brokerSendToDlaOnNoRoute | Forward messages to a dead letter address when no queues subscribing | false |
 
 # Usage examples
 
-Artemis binder does not impose any other usage requirements from a generic Spring Cloud Stream application. Please refer to a Spring Cloud Stream [documentation](https://docs.spring.io/spring-cloud-stream/docs/Elmhurst.SR1/reference/htmlsingle) for a detailed usage explanation.
+Artemis binder does not impose any other usage requirements from a generic Spring Cloud Stream application. Please refer to a Spring Cloud Stream [documentation](https://docs.spring.io/spring-cloud-stream/docs/Elmhurst.SR2/reference/htmlsingle) for a detailed usage explanation.
 
 ## Example applications
 | Name | Description |
 | ---- | ----------- |
 | [External broker example](https://github.com/gytis/spring-cloud-stream-artemis-sample) | This example is a [multi-io](https://github.com/spring-cloud/spring-cloud-stream-samples/blob/master/multi-io) application from Spring Cloud Stream samples repository configured to use Artemis binder and remote Apache Artemis broker.
+
+# Notes on implementation details
+
+## Address and queue conventions
+
+When creating addresses and queues binder uses the following conventions (make sure there are no conflicts with other broker users):
+* Destination addresses and queues use multicast
+* Unpartitioned destination address is named the same as the destination
+* Partitioned destination addresses are named the same as the destination and suffixed with partition number e.g. test-0, test-1
+* Queues for consumers are named as a combination of an address and a group name (or a generated string for anonymous consumers) e.g. test-output, test-0-input
+* Destination specific dead letter addresses and queues are named the same as the destination address with a suffix ".dlq"
+* Destination specific expiry addresses and queues are named the same as the destination address with a suffix ".exp"
+
+## Retry template error conventions
+
+Consumer retry template is enabled if `maxAttempts` property is set to a number higher than 1.
+In that case failed deliveries will be sent to an error channel.
+Error channel is named using the following patter: `{destination name}[-{partition number}]-{group name or generated string}.errors`, e.g. test-output.errors, test-0-input.errors
+
 
 # Building and testing the project
 
@@ -69,15 +109,15 @@ Also, if you stumble upon an issues or think that some feature should be added, 
 
 Dry run:
 ```
-mvn release:prepare -DdryRun
+./mvnw release:prepare -DdryRun
 ```
 
 Tag:
 ```
-mvn release:prepare
+./mvnw release:prepare
 ```
 
 Deploy:
 ```
-mvn release:perform -DskipTests
+./mvnw release:perform
 ```
