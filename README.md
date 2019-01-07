@@ -38,7 +38,7 @@ Artemis binder supports Spring Cloud Stream configuration as described in its [d
 ## Artemis address configuration
 
 For each configured destination Artemis address is created using default broker address settings.
-Following properties can be used to override them for addresses created by this binder assuming broker the user has management permissions.
+Following properties can be used to override them for addresses created by this binder assuming the user has management permissions.
 
 | Property | Description | Default value |
 | -------- | ----------- | ------------- |
