@@ -60,7 +60,7 @@ Artemis binder does not impose any other usage requirements from a generic Sprin
 ## Example applications
 | Name | Description |
 | ---- | ----------- |
-| [External broker example](https://github.com/gytis/spring-cloud-stream-artemis-sample) | This example is a [multi-io](https://github.com/spring-cloud/spring-cloud-stream-samples/blob/master/multi-io) application from Spring Cloud Stream samples repository configured to use Artemis binder and remote Apache Artemis broker.
+| [Multi IO](./spring-cloud-starter-stream-artemis-samples/multi-io) | This example is a multi-io sample application from Spring Cloud Stream samples repository configured to use Artemis binder and an embedded Apache Artemis broker.
 
 # Notes on implementation details
 

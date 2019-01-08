@@ -267,5 +267,6 @@
     <module>spring-cloud-stream-binder-artemis</module>
     <module>spring-cloud-starter-stream-artemis</module>
     <module>spring-cloud-starter-stream-artemis-it</module>
+    <module>spring-cloud-starter-stream-artemis-samples</module>
   </modules>
 </project>
