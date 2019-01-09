@@ -29,29 +29,25 @@ public final class NamingUtils {
 
     public static String getPartitionAddress(String address, int partition) {
         Objects.requireNonNull(address);
-
+        // Cannot use "." like in other binders, because ActiveMQDestination.escape does not allow that
         return String.format("%s-%d", address, partition);
     }
 
     public static String getQueueName(String address, String group) {
         Objects.requireNonNull(address);
         Objects.requireNonNull(group);
-
+        // Cannot use "." like in other binders, because ActiveMQDestination.escape does not allow that
         return String.format("%s-%s", address, group);
     }
 
-    public static String getAnonymousQueueName(String address) {
-        Objects.requireNonNull(address);
-
+    public static String getAnonymousGroupName() {
         UUID uuid = UUID.randomUUID();
         ByteBuffer buffer = ByteBuffer.wrap(new byte[16]);
         buffer.putLong(uuid.getMostSignificantBits())
                 .putLong(uuid.getLeastSignificantBits());
-        String suffix = Base64Utils.encodeToUrlSafeString(buffer.array())
-                .replaceAll("=", "")
-                .replaceAll("-", "\\$");
-
-        return String.format("%s-%s", address, suffix);
+        // Cannot use "." like in other binders, because ActiveMQDestination.escape does not allow that
+        return "anonymous-" + Base64Utils.encodeToUrlSafeString(buffer.array())
+                .replaceAll("=", "");
     }
 
 }

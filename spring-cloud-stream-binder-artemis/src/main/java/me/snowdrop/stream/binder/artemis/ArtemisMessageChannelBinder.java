@@ -43,7 +43,7 @@ import org.springframework.messaging.MessageHandler;
 import org.springframework.retry.support.RetryTemplate;
 import org.springframework.util.StringUtils;
 
-import static me.snowdrop.stream.binder.artemis.common.NamingUtils.getAnonymousQueueName;
+import static me.snowdrop.stream.binder.artemis.common.NamingUtils.getAnonymousGroupName;
 import static me.snowdrop.stream.binder.artemis.common.NamingUtils.getQueueName;
 import static org.springframework.cloud.stream.binder.BinderHeaders.PARTITION_HEADER;
 
@@ -90,7 +90,11 @@ public class ArtemisMessageChannelBinder extends
             ExtendedConsumerProperties<ArtemisConsumerProperties> properties) {
         logger.debug("Creating consumer endpoint for '{}' with a group '{}'", destination, group);
 
-        String subscriptionName = getSubscriptionName(destination.getName(), group);
+        if (!StringUtils.hasText(group)) {
+            group = getAnonymousGroupName();
+        }
+
+        String subscriptionName = getQueueName(destination.getName(), group);
         ListenerContainerFactory listenerContainerFactory = new ListenerContainerFactory(connectionFactory);
         AbstractMessageListenerContainer listenerContainer = listenerContainerFactory
                 .getListenerContainer(destination.getName(), subscriptionName);
@@ -120,15 +124,17 @@ public class ArtemisMessageChannelBinder extends
     @Override
     protected String errorsBaseName(ConsumerDestination destination, String group,
             ExtendedConsumerProperties<ArtemisConsumerProperties> properties) {
-        return getSubscriptionName(destination.getName(), group) + ".errors";
-    }
-
-    private String getSubscriptionName(String address, String group) {
-        if (StringUtils.hasText(group)) {
-            return getQueueName(address, group);
-        } else {
-            return getAnonymousQueueName(address);
+        if (group == null) {
+            /*
+            This is a workaround to not get NPE when calling getQueueName.
+            Such situation occurs with anonymous groups during the destroyErrorInfrastructure execution.
+            Differently from registerErrorInfrastructure, destroyErrorInfrastructure doesn't know generated group name and uses null instead.
+            However, this means that the actual channel, recoverer, message handler and bridge handler beans aren't destroyed.
+            See https://github.com/snowdrop/spring-cloud-stream-binder-artemis/issues/22
+             */
+            return destination.getName() + ".errors";
         }
+        return getQueueName(destination.getName(), group) + ".errors";
     }
 
     private String getMessageDestination(Message<?> message, ProducerDestination destination) {
