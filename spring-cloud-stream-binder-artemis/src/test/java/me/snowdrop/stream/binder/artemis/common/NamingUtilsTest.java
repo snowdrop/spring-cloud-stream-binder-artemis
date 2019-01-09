@@ -36,13 +36,8 @@ public class NamingUtilsTest {
 
     @Test
     public void shouldGetAnonymousQueueName() {
-        assertThat(NamingUtils.getAnonymousQueueName("testAddress")).hasSize(34)
-                .startsWith("testAddress-");
-    }
-
-    @Test(expected = NullPointerException.class)
-    public void shouldNotAcceptNullAddressToGetAnonymousQueueName() {
-        NamingUtils.getAnonymousQueueName(null);
+        assertThat(NamingUtils.getAnonymousGroupName()).hasSize(32)
+                .startsWith("anonymous-");
     }
 
 }
