@@ -1,5 +1,8 @@
 package me.snowdrop.stream.binder.artemis;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.BDDMockito.given;
+
 import me.snowdrop.stream.binder.artemis.listener.RetryableChannelPublishingJmsMessageListener;
 import me.snowdrop.stream.binder.artemis.properties.ArtemisConsumerProperties;
 import me.snowdrop.stream.binder.artemis.provisioning.ArtemisConsumerDestination;
@@ -8,17 +11,14 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
+import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.cloud.stream.binder.ExtendedConsumerProperties;
-import org.springframework.context.support.AbstractApplicationContext;
+import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.integration.core.MessageProducer;
 import org.springframework.integration.jms.ChannelPublishingJmsMessageListener;
 import org.springframework.integration.jms.JmsMessageDrivenEndpoint;
 import org.springframework.integration.jms.JmsSendingMessageHandler;
 import org.springframework.messaging.MessageHandler;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.BDDMockito.given;
 
 /**
  * @author <a href="mailto:gytis@redhat.com">Gytis Trikleris</a>
@@ -30,16 +30,15 @@ public class ArtemisMessageChannelBinderTest {
     private ExtendedConsumerProperties<ArtemisConsumerProperties> mockConsumerProperties;
 
     @Mock
-    private AbstractApplicationContext mockApplicationContext;
+    private DefaultListableBeanFactory mockBeanFactory;
 
-    @Mock
-    private ConfigurableListableBeanFactory mockBeanFactory;
+    private GenericApplicationContext mockApplicationContext;
 
     private ArtemisMessageChannelBinder binder;
 
     @Before
     public void before() {
-        given(mockApplicationContext.getBeanFactory()).willReturn(mockBeanFactory);
+        mockApplicationContext = new GenericApplicationContext(mockBeanFactory);
 
         binder = new ArtemisMessageChannelBinder(null, null, null);
         binder.setApplicationContext(mockApplicationContext);

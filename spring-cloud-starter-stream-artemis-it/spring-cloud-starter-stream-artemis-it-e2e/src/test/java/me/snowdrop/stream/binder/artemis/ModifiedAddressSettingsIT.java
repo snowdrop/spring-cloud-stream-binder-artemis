@@ -30,6 +30,7 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import static org.apache.activemq.artemis.api.core.management.ResourceNames.BROKER;
@@ -51,6 +52,7 @@ import static org.assertj.core.api.Assertions.assertThat;
                 "spring.cloud.stream.artemis.bindings.input.consumer.brokerRedeliveryDelayMultiplier=3.0",
                 "spring.cloud.stream.artemis.bindings.input.consumer.brokerMaxDeliveryAttempts=4",
                 "spring.cloud.stream.artemis.bindings.input.consumer.brokerSendToDlaOnNoRoute=true",
+                "spring.jms.cache.enabled=false"
         }
 )
 @Import({ IntegerStreamListener.class })

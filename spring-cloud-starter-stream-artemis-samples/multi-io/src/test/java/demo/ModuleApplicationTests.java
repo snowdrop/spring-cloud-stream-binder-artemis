@@ -25,7 +25,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 
 @RunWith(SpringJUnit4ClassRunner.class)
-@SpringBootTest(classes = MultipleIOChannelsApplication.class)
+@SpringBootTest(classes = MultipleIOChannelsApplication.class, properties = {"spring.jms.cache.enabled=false"})
 @WebAppConfiguration
 @DirtiesContext
 public class ModuleApplicationTests {

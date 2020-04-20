@@ -38,7 +38,8 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 @RunWith(SpringRunner.class)
 @SpringBootTest(
-        classes = StreamApplication.class
+        classes = StreamApplication.class,
+        properties = "spring.jms.cache.enabled=false"
 )
 public class ArtemisBinderWithStreamProcessorIT {
 

@@ -24,6 +24,7 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import static java.util.concurrent.TimeUnit.SECONDS;
@@ -39,7 +40,8 @@ import static org.awaitility.Awaitility.await;
         properties = {
                 "spring.artemis.embedded.queues=existing-destination",
                 "spring.cloud.stream.bindings.output.destination=existing-destination",
-                "spring.cloud.stream.bindings.input.destination=existing-destination"
+                "spring.cloud.stream.bindings.input.destination=existing-destination",
+                "spring.jms.cache.enabled=false"
         }
 )
 @Import({ StringStreamSource.class, StringStreamListener.class })
@@ -55,7 +57,7 @@ public class ExistingAddressIT {
     public void shouldSendAndReceiveMessageThroughExistingAddress() {
         source.send("test message");
 
-        await().atMost(5, SECONDS)
+        await().atMost(10, SECONDS)
                 .until(() -> listener.getPayloads().size() == 1);
 
         assertThat(listener.getPayloads())

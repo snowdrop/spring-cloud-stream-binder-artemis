@@ -16,6 +16,10 @@
 
 package me.snowdrop.stream.binder.artemis;
 
+import static me.snowdrop.stream.binder.artemis.common.NamingUtils.getAnonymousGroupName;
+import static me.snowdrop.stream.binder.artemis.common.NamingUtils.getQueueName;
+import static org.springframework.cloud.stream.binder.BinderHeaders.PARTITION_HEADER;
+
 import javax.jms.ConnectionFactory;
 
 import me.snowdrop.stream.binder.artemis.listener.ListenerContainerFactory;
@@ -24,9 +28,8 @@ import me.snowdrop.stream.binder.artemis.properties.ArtemisConsumerProperties;
 import me.snowdrop.stream.binder.artemis.properties.ArtemisExtendedBindingProperties;
 import me.snowdrop.stream.binder.artemis.properties.ArtemisProducerProperties;
 import me.snowdrop.stream.binder.artemis.provisioning.ArtemisProvisioningProvider;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.cloud.stream.binder.AbstractMessageChannelBinder;
+import org.springframework.cloud.stream.binder.BinderSpecificPropertiesProvider;
 import org.springframework.cloud.stream.binder.ExtendedConsumerProperties;
 import org.springframework.cloud.stream.binder.ExtendedProducerProperties;
 import org.springframework.cloud.stream.binder.ExtendedPropertiesBinder;
@@ -43,21 +46,15 @@ import org.springframework.messaging.MessageHandler;
 import org.springframework.retry.support.RetryTemplate;
 import org.springframework.util.StringUtils;
 
-import static me.snowdrop.stream.binder.artemis.common.NamingUtils.getAnonymousGroupName;
-import static me.snowdrop.stream.binder.artemis.common.NamingUtils.getQueueName;
-import static org.springframework.cloud.stream.binder.BinderHeaders.PARTITION_HEADER;
-
 /**
  * @author <a href="mailto:gytis@redhat.com">Gytis Trikleris</a>
  */
 public class ArtemisMessageChannelBinder extends
-        AbstractMessageChannelBinder<ExtendedConsumerProperties<ArtemisConsumerProperties>,
-                ExtendedProducerProperties<ArtemisProducerProperties>, ArtemisProvisioningProvider>
+        AbstractMessageChannelBinder<ExtendedConsumerProperties<ArtemisConsumerProperties>, ExtendedProducerProperties<ArtemisProducerProperties>,
+                ArtemisProvisioningProvider>
         implements ExtendedPropertiesBinder<MessageChannel, ArtemisConsumerProperties, ArtemisProducerProperties> {
 
     private static final String[] DEFAULT_HEADERS = new String[0];
-
-    private final Logger logger = LoggerFactory.getLogger(ArtemisMessageChannelBinder.class);
 
     private final ConnectionFactory connectionFactory;
 
@@ -73,12 +70,12 @@ public class ArtemisMessageChannelBinder extends
     @Override
     protected MessageHandler createProducerMessageHandler(ProducerDestination destination,
             ExtendedProducerProperties<ArtemisProducerProperties> properties, MessageChannel errorChannel) {
-        logger.debug("Creating producer message handler for '{}'", destination);
+        logger.debug("Creating producer message handler for '" + destination + "'");
 
         JmsSendingMessageHandler handler = Jms.outboundAdapter(connectionFactory)
-                .destination(message -> getMessageDestination(message, destination))
-                .configureJmsTemplate(templateSpec -> templateSpec.pubSubDomain(true))
-                .get();
+                                              .destination(message -> getMessageDestination(message, destination))
+                                              .configureJmsTemplate(templateSpec -> templateSpec.pubSubDomain(true))
+                                              .get();
         handler.setApplicationContext(getApplicationContext());
         handler.setBeanFactory(getBeanFactory());
 
@@ -88,9 +85,9 @@ public class ArtemisMessageChannelBinder extends
     @Override
     protected MessageProducer createConsumerEndpoint(ConsumerDestination destination, String group,
             ExtendedConsumerProperties<ArtemisConsumerProperties> properties) {
-        logger.debug("Creating consumer endpoint for '{}' with a group '{}'", destination, group);
+        logger.debug("Creating consumer endpoint for '{" + destination + "}' with a group '{" + group + "}'");
 
-        if (!StringUtils.hasText(group)) {
+        if ( !StringUtils.hasText(group) ) {
             group = getAnonymousGroupName();
         }
 
@@ -99,7 +96,7 @@ public class ArtemisMessageChannelBinder extends
         AbstractMessageListenerContainer listenerContainer = listenerContainerFactory
                 .getListenerContainer(destination.getName(), subscriptionName);
 
-        if (properties.getMaxAttempts() == 1) {
+        if ( properties.getMaxAttempts() == 1 ) {
             return Jms.messageDrivenChannelAdapter(listenerContainer).get();
         }
 
@@ -122,9 +119,19 @@ public class ArtemisMessageChannelBinder extends
     }
 
     @Override
+    public String getDefaultsPrefix() {
+        return this.bindingProperties.getDefaultsPrefix();
+    }
+
+    @Override
+    public Class<? extends BinderSpecificPropertiesProvider> getExtendedPropertiesEntryClass() {
+        return this.bindingProperties.getExtendedPropertiesEntryClass();
+    }
+
+    @Override
     protected String errorsBaseName(ConsumerDestination destination, String group,
             ExtendedConsumerProperties<ArtemisConsumerProperties> properties) {
-        if (group == null) {
+        if ( group == null ) {
             /*
             This is a workaround to not get NPE when calling getQueueName.
             Such situation occurs with anonymous groups during the destroyErrorInfrastructure execution.
@@ -139,16 +146,16 @@ public class ArtemisMessageChannelBinder extends
 
     private String getMessageDestination(Message<?> message, ProducerDestination destination) {
         Object partition = message.getHeaders()
-                .get(PARTITION_HEADER);
+                                  .get(PARTITION_HEADER);
 
-        if (partition == null) {
+        if ( partition == null ) {
             return destination.getName();
         }
-        if (partition instanceof Integer) {
+        if ( partition instanceof Integer ) {
             return destination.getNameForPartition((Integer) partition);
         }
-        if (partition instanceof String) {
-            return destination.getNameForPartition(Integer.valueOf((String) partition));
+        if ( partition instanceof String ) {
+            return destination.getNameForPartition(Integer.parseInt((String) partition));
         }
         throw new IllegalArgumentException(
                 String.format("The provided partition '%s' is not a valid format", partition));

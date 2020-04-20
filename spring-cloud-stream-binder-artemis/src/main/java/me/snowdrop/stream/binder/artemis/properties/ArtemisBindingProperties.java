@@ -16,15 +16,18 @@
 
 package me.snowdrop.stream.binder.artemis.properties;
 
+import org.springframework.cloud.stream.binder.BinderSpecificPropertiesProvider;
+
 /**
  * @author <a href="mailto:gytis@redhat.com">Gytis Trikleris</a>
  */
-public class ArtemisBindingProperties {
+public class ArtemisBindingProperties implements BinderSpecificPropertiesProvider {
 
     private ArtemisConsumerProperties consumer = new ArtemisConsumerProperties();
 
     private ArtemisProducerProperties producer = new ArtemisProducerProperties();
 
+    @Override
     public ArtemisConsumerProperties getConsumer() {
         return consumer;
     }
@@ -33,6 +36,7 @@ public class ArtemisBindingProperties {
         this.consumer = consumer;
     }
 
+    @Override
     public ArtemisProducerProperties getProducer() {
         return producer;
     }

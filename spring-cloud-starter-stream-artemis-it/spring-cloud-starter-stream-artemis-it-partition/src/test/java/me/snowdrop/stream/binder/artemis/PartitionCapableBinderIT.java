@@ -16,6 +16,8 @@
 
 package me.snowdrop.stream.binder.artemis;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.List;
@@ -35,16 +37,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.jms.artemis.ArtemisAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.stream.binder.Binder;
-import org.springframework.cloud.stream.binder.BinderHeaders;
 import org.springframework.cloud.stream.binder.Binding;
 import org.springframework.cloud.stream.binder.ExtendedConsumerProperties;
 import org.springframework.cloud.stream.binder.ExtendedProducerProperties;
 import org.springframework.cloud.stream.binder.PartitionCapableBinderTests;
-import org.springframework.cloud.stream.binder.SerializableFoo;
 import org.springframework.cloud.stream.binder.Spy;
 import org.springframework.cloud.stream.config.BindingProperties;
-import org.springframework.cloud.stream.converter.JavaSerializationMessageConverter;
-import org.springframework.cloud.stream.converter.MessageConverterUtils;
 import org.springframework.context.annotation.Import;
 import org.springframework.integration.IntegrationMessageHeaderAccessor;
 import org.springframework.integration.channel.DirectChannel;
@@ -54,19 +52,19 @@ import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.MessageDeliveryException;
 import org.springframework.messaging.MessageHeaders;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.util.Assert;
 import org.springframework.util.MimeTypeUtils;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertNotNull;
 
 /**
  * @author <a href="mailto:gytis@redhat.com">Gytis Trikleris</a>
  */
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = StreamApplication.class)
+@SpringBootTest(classes = StreamApplication.class,
+        properties = { "spring.jms.cache.enabled=false"})
 @Import({ ArtemisAutoConfiguration.class, ArtemisBinderAutoConfiguration.class })
+@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_CLASS)
 public class PartitionCapableBinderIT extends
         PartitionCapableBinderTests<ArtemisTestBinder, ExtendedConsumerProperties<ArtemisConsumerProperties>,
                 ExtendedProducerProperties<ArtemisProducerProperties>> {
@@ -115,68 +113,12 @@ public class PartitionCapableBinderIT extends
         // Here parent looks for TEXT_PLAIN which is not correct
         assertThat(inboundMessageRef.get().getHeaders().get(MessageHeaders.CONTENT_TYPE).toString())
                 .isEqualTo(MimeTypeUtils.APPLICATION_JSON_VALUE);
-        producerBinding.unbind();
-        consumerBinding.unbind();
-    }
-
-    /**
-     * Overriding because SimpleJmsHeaderMapper doesn't accept MimeType as a header value which is used by the parent
-     */
-    @Test
-    @Override
-    public void testSendAndReceiveJavaSerialization() throws Exception {
-        Binder binder = getBinder();
-        BindingProperties outputBindingProperties = createProducerBindingProperties(createProducerProperties());
-
-        DirectChannel moduleOutputChannel = createBindableChannel("output", outputBindingProperties);
-
-        BindingProperties inputBindingProperties = createConsumerBindingProperties(createConsumerProperties());
-        DirectChannel moduleInputChannel = createBindableChannel("input", inputBindingProperties);
-
-        Binding<MessageChannel> producerBinding = binder.bindProducer(String.format("foo%s0y",
-                getDestinationNameDelimiter()), moduleOutputChannel, outputBindingProperties.getProducer());
-
-        Binding<MessageChannel> consumerBinding = binder.bindConsumer(String.format("foo%s0y",
-                getDestinationNameDelimiter()), "testSendAndReceiveJavaSerialization", moduleInputChannel,
-                inputBindingProperties.getConsumer());
-        SerializableFoo foo = new SerializableFoo();
-        Message<?> message =
-                MessageBuilder.withPayload(foo)
-                        // Here parent uses MessageConverterUtils.X_JAVA_SERIALIZED_OBJECT which type is not supported by the mapper
-                        .setHeader(MessageHeaders.CONTENT_TYPE, "application/x-java-serialized-object")
-                        .build();
-        // Let the consumer actually bind to the producer before sending a msg
-        binderBindUnbindLatency();
-
-        CountDownLatch latch = new CountDownLatch(1);
-        AtomicReference<Message<byte[]>> inboundMessageRef = new AtomicReference<Message<byte[]>>();
-        moduleInputChannel.subscribe(message1 -> {
-            try {
-                inboundMessageRef.set((Message<byte[]>) message1);
-            } finally {
-                latch.countDown();
-            }
-        });
-
-        moduleOutputChannel.send(message);
-        Assert.isTrue(latch.await(5, TimeUnit.SECONDS), "Failed to receive message");
-
-        JavaSerializationMessageConverter converter = new JavaSerializationMessageConverter();
-        SerializableFoo serializableFoo =
-                (SerializableFoo) converter.convertFromInternal(inboundMessageRef.get(), SerializableFoo.class, null);
-        assertNotNull(serializableFoo);
-        assertThat(inboundMessageRef.get().getHeaders().get(BinderHeaders.BINDER_ORIGINAL_CONTENT_TYPE)).isNull();
-        assertThat(inboundMessageRef.get().getHeaders().get(MessageHeaders.CONTENT_TYPE)).isEqualTo(
-                MessageConverterUtils.X_JAVA_SERIALIZED_OBJECT);
-        producerBinding.unbind();
-        consumerBinding.unbind();
     }
 
     /**
      * Overriding because SimpleJmsHeaderMapper doesn't accept MimeType as a header value which is used by the parent
      */
     @Test(expected = MessageDeliveryException.class)
-    @Override
     public void testStreamListenerJavaSerializationNonSerializable() throws Exception {
         Binder binder = getBinder();
 
@@ -302,26 +244,6 @@ public class PartitionCapableBinderIT extends
         input1Binding.unbind();
         input2Binding.unbind();
         outputBinding.unbind();
-    }
-
-    /**
-     * Ignoring because Kryo is no longer supported
-     */
-    @Ignore
-    @Test
-    @Override
-    public void testSendAndReceiveKryo() {
-
-    }
-
-    /**
-     * Ignoring because Kryo is no longer supported
-     */
-    @Ignore
-    @Test
-    @Override
-    public void testSendPojoReceivePojoKryoWithStreamListener() {
-
     }
 
     /**
