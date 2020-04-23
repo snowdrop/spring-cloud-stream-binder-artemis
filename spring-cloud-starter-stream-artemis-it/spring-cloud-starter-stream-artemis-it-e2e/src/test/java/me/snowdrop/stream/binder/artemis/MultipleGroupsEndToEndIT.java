@@ -25,7 +25,6 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
-import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import static java.util.concurrent.TimeUnit.SECONDS;
@@ -43,8 +42,7 @@ import static org.awaitility.Awaitility.await;
                 "spring.cloud.stream.bindings.input.destination=multiple-groups-destination",
                 "spring.cloud.stream.bindings.alternativeInput.destination=multiple-groups-destination",
                 "spring.cloud.stream.bindings.input.group=group-1",
-                "spring.cloud.stream.bindings.alternativeInput.group=group-2",
-                "spring.jms.cache.enabled=false"
+                "spring.cloud.stream.bindings.alternativeInput.group=group-2"
         }
 )
 @Import({ StringStreamSource.class, StringStreamListener.class, AlternativeStringStreamListener.class })

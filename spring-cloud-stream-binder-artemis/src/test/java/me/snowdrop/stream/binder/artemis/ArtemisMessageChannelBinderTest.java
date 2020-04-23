@@ -1,8 +1,5 @@
 package me.snowdrop.stream.binder.artemis;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.BDDMockito.given;
-
 import me.snowdrop.stream.binder.artemis.listener.RetryableChannelPublishingJmsMessageListener;
 import me.snowdrop.stream.binder.artemis.properties.ArtemisConsumerProperties;
 import me.snowdrop.stream.binder.artemis.provisioning.ArtemisConsumerDestination;
@@ -20,6 +17,9 @@ import org.springframework.integration.jms.JmsMessageDrivenEndpoint;
 import org.springframework.integration.jms.JmsSendingMessageHandler;
 import org.springframework.messaging.MessageHandler;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.BDDMockito.given;
+
 /**
  * @author <a href="mailto:gytis@redhat.com">Gytis Trikleris</a>
  */
@@ -32,16 +32,12 @@ public class ArtemisMessageChannelBinderTest {
     @Mock
     private DefaultListableBeanFactory mockBeanFactory;
 
-    private GenericApplicationContext mockApplicationContext;
-
     private ArtemisMessageChannelBinder binder;
 
     @Before
     public void before() {
-        mockApplicationContext = new GenericApplicationContext(mockBeanFactory);
-
         binder = new ArtemisMessageChannelBinder(null, null, null);
-        binder.setApplicationContext(mockApplicationContext);
+        binder.setApplicationContext(new GenericApplicationContext(mockBeanFactory));
     }
 
     @Test

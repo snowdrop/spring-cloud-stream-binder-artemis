@@ -30,7 +30,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.jms.core.JmsTemplate;
-import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import static me.snowdrop.stream.binder.artemis.common.NamingUtils.getQueueName;
@@ -40,10 +39,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author <a href="mailto:gytis@redhat.com">Gytis Trikleris</a>
  */
 @RunWith(SpringRunner.class)
-@SpringBootTest(
-        classes = StreamApplication.class,
-        properties = {"spring.jms.cache.enabled=false" }
-)
+@SpringBootTest(classes = StreamApplication.class)
 @Import({ DynamicDestinationIT.TestConfiguration.class, DynamicDestinationSource.class })
 public class DynamicDestinationIT {
 

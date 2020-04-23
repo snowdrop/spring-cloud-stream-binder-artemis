@@ -22,9 +22,11 @@ import me.snowdrop.stream.binder.artemis.listener.ListenerContainerFactory;
 import me.snowdrop.stream.binder.artemis.properties.ArtemisExtendedBindingProperties;
 import me.snowdrop.stream.binder.artemis.provisioning.ArtemisBrokerManager;
 import me.snowdrop.stream.binder.artemis.provisioning.ArtemisProvisioningProvider;
+import org.apache.activemq.artemis.api.core.client.ServerLocator;
 import org.apache.activemq.artemis.jms.client.ActiveMQConnectionFactory;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.jms.artemis.ArtemisAutoConfiguration;
 import org.springframework.boot.autoconfigure.jms.artemis.ArtemisProperties;
@@ -32,13 +34,15 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.cloud.stream.provisioning.ProvisioningProvider;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.jms.connection.SingleConnectionFactory;
 
 /**
  * @author <a href="mailto:gytis@redhat.com">Gytis Trikleris</a>
  */
 @Configuration
 @AutoConfigureAfter(ArtemisAutoConfiguration.class)
-@ConditionalOnBean(ActiveMQConnectionFactory.class)
+@ConditionalOnClass(ActiveMQConnectionFactory.class)
+@ConditionalOnBean(ConnectionFactory.class)
 @EnableConfigurationProperties(ArtemisExtendedBindingProperties.class)
 public class ArtemisBinderAutoConfiguration {
 
@@ -57,10 +61,19 @@ public class ArtemisBinderAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    ArtemisBrokerManager artemisBrokerManager(ActiveMQConnectionFactory connectionFactory,
-            ArtemisProperties artemisProperties) {
-        return new ArtemisBrokerManager(connectionFactory.getServerLocator(), artemisProperties.getUser(),
-                artemisProperties.getPassword());
+    ArtemisBrokerManager artemisBrokerManager(ConnectionFactory connectionFactory, ArtemisProperties properties) {
+        return new ArtemisBrokerManager(getServerLocator(connectionFactory), properties.getUser(),
+                properties.getPassword());
+    }
+
+    private ServerLocator getServerLocator(ConnectionFactory connectionFactory) {
+        if (connectionFactory instanceof ActiveMQConnectionFactory) {
+            return ((ActiveMQConnectionFactory) connectionFactory).getServerLocator();
+        }
+        if (connectionFactory instanceof SingleConnectionFactory) {
+            return getServerLocator(((SingleConnectionFactory) connectionFactory).getTargetConnectionFactory());
+        }
+        throw new RuntimeException("Unsupported connection factory " + connectionFactory.getClass().getName());
     }
 
     @Bean

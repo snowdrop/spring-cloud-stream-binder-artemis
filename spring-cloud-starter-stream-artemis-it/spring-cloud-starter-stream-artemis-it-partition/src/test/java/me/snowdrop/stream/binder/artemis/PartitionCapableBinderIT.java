@@ -16,8 +16,6 @@
 
 package me.snowdrop.stream.binder.artemis;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.List;
@@ -57,12 +55,16 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.util.Assert;
 import org.springframework.util.MimeTypeUtils;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 /**
  * @author <a href="mailto:gytis@redhat.com">Gytis Trikleris</a>
  */
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = StreamApplication.class,
-        properties = { "spring.jms.cache.enabled=false"})
+@SpringBootTest(
+        classes = StreamApplication.class,
+        properties = "spring.jms.cache.enabled=false"
+)
 @Import({ ArtemisAutoConfiguration.class, ArtemisBinderAutoConfiguration.class })
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_CLASS)
 public class PartitionCapableBinderIT extends

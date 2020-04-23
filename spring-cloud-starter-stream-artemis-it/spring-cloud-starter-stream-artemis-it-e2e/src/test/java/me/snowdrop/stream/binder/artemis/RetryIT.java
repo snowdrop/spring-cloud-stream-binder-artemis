@@ -25,8 +25,7 @@ import static org.hamcrest.Matchers.equalTo;
                 "spring.cloud.stream.bindings.output.destination=failing-destination",
                 "spring.cloud.stream.bindings.input.destination=failing-destination",
                 "spring.cloud.stream.bindings.input.group=failing-group",
-                "spring.cloud.stream.bindings.input.consumer.back-off-multiplier=1",
-                "spring.jms.cache.enabled=false"
+                "spring.cloud.stream.bindings.input.consumer.back-off-multiplier=1"
         }
 )
 @Import({ StringStreamSource.class, FailingStreamListener.class })
