@@ -48,8 +48,7 @@ import static org.awaitility.Awaitility.await;
                 "spring.cloud.stream.bindings.alternativeInput.group=group-1",
                 // causes issues when registering two error channel beans which share the same name
                 "spring.cloud.stream.bindings.input.consumer.max-attempts=1",
-                "spring.cloud.stream.bindings.alternativeInput.consumer.max-attempts=1",
-                "spring.jms.cache.enabled=false"
+                "spring.cloud.stream.bindings.alternativeInput.consumer.max-attempts=1"
         }
 )
 @Import({ StringStreamSource.class, StringStreamListener.class, AlternativeStringStreamListener.class })

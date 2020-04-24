@@ -23,7 +23,6 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
-import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import static java.util.concurrent.TimeUnit.SECONDS;
@@ -34,8 +33,7 @@ import static org.awaitility.Awaitility.await;
         classes = StreamApplication.class,
         properties = {
                 "spring.cloud.stream.bindings.output.destination=primitive-destination",
-                "spring.cloud.stream.bindings.input.destination=primitive-destination",
-                "spring.jms.cache.enabled=false"
+                "spring.cloud.stream.bindings.input.destination=primitive-destination"
         }
 )
 @Import({ IntegerStreamSource.class, IntegerStreamListener.class })

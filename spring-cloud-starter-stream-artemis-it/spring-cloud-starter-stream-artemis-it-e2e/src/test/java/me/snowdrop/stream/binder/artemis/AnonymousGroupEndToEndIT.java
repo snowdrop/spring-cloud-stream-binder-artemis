@@ -39,8 +39,7 @@ import static org.awaitility.Awaitility.await;
         properties = {
                 "spring.cloud.stream.bindings.output.destination=anonymous-destination",
                 "spring.cloud.stream.bindings.input.destination=anonymous-destination",
-                "spring.cloud.stream.bindings.alternativeInput.destination=anonymous-destination",
-                "spring.jms.cache.enabled=false"
+                "spring.cloud.stream.bindings.alternativeInput.destination=anonymous-destination"
         }
 )
 @Import({ StringStreamSource.class, StringStreamListener.class, AlternativeStringStreamListener.class })
