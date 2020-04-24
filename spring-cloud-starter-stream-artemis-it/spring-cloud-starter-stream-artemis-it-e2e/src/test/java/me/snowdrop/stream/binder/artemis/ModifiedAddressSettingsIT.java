@@ -15,6 +15,8 @@
  */
 package me.snowdrop.stream.binder.artemis;
 
+import javax.jms.ConnectionFactory;
+
 import me.snowdrop.stream.binder.artemis.application.StreamApplication;
 import me.snowdrop.stream.binder.artemis.listeners.IntegerStreamListener;
 import org.apache.activemq.artemis.api.core.client.ClientMessage;
@@ -30,6 +32,7 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.jms.connection.SingleConnectionFactory;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import static org.apache.activemq.artemis.api.core.management.ResourceNames.BROKER;
@@ -57,12 +60,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class ModifiedAddressSettingsIT {
 
     @Autowired
-    private ActiveMQConnectionFactory connectionFactory;
+    private ConnectionFactory connectionFactory;
 
     @Test
     public void shouldGetModifiedAddressSettings() throws Exception {
-        ServerLocator serverLocator = connectionFactory.getServerLocator();
-        try (ClientSessionFactory sessionFactory = serverLocator.createSessionFactory();
+        try (ClientSessionFactory sessionFactory = getServerLocator(connectionFactory).createSessionFactory();
              ClientSession session = sessionFactory.createSession();
              ClientRequestor requestor = new ClientRequestor(session, "activemq.management")) {
             session.start();
@@ -84,4 +86,13 @@ public class ModifiedAddressSettingsIT {
         }
     }
 
+    private ServerLocator getServerLocator(ConnectionFactory connectionFactory) {
+        if (connectionFactory instanceof ActiveMQConnectionFactory) {
+            return ((ActiveMQConnectionFactory) connectionFactory).getServerLocator();
+        }
+        if (connectionFactory instanceof SingleConnectionFactory) {
+            return getServerLocator(((SingleConnectionFactory) connectionFactory).getTargetConnectionFactory());
+        }
+        throw new RuntimeException("Unsupported connection factory " + connectionFactory.getClass().getName());
+    }
 }

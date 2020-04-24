@@ -8,6 +8,7 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import static java.util.concurrent.TimeUnit.SECONDS;
@@ -28,6 +29,7 @@ import static org.hamcrest.Matchers.equalTo;
         }
 )
 @Import({ StringStreamSource.class, FailingStreamListener.class })
+@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_CLASS)
 public class RetryIT {
 
     @Autowired
@@ -40,7 +42,7 @@ public class RetryIT {
     public void shouldRetryFailingDeliveries() {
         source.send("test message");
 
-        await().atMost(5, SECONDS)
+        await().atMost(60, SECONDS)
                 .until(listener::getErrorsCounter, is(equalTo(1)));
 
         assertThat(listener.getReceivedMessages())

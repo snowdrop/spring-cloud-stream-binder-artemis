@@ -27,6 +27,7 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import static java.util.concurrent.TimeUnit.SECONDS;
@@ -51,6 +52,7 @@ import static org.awaitility.Awaitility.await;
         }
 )
 @Import({ StringStreamSource.class, StringStreamListener.class, AlternativeStringStreamListener.class })
+@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_CLASS)
 public class SingleGroupEndToEndIT {
 
     @Autowired
@@ -67,7 +69,7 @@ public class SingleGroupEndToEndIT {
         source.send("test message 1");
         source.send("test message 2");
 
-        await().atMost(5, SECONDS)
+        await().atMost(30, SECONDS)
                 .until(() -> listener.getPayloads().size() == 1 && alternativeListener.getPayloads().size() == 1);
 
         List<String> payloads = listener.getPayloads();

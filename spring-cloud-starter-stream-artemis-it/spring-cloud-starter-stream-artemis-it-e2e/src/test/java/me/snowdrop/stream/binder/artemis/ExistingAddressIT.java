@@ -55,7 +55,7 @@ public class ExistingAddressIT {
     public void shouldSendAndReceiveMessageThroughExistingAddress() {
         source.send("test message");
 
-        await().atMost(5, SECONDS)
+        await().atMost(10, SECONDS)
                 .until(() -> listener.getPayloads().size() == 1);
 
         assertThat(listener.getPayloads())

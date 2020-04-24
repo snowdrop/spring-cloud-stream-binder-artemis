@@ -24,9 +24,8 @@ import me.snowdrop.stream.binder.artemis.properties.ArtemisConsumerProperties;
 import me.snowdrop.stream.binder.artemis.properties.ArtemisExtendedBindingProperties;
 import me.snowdrop.stream.binder.artemis.properties.ArtemisProducerProperties;
 import me.snowdrop.stream.binder.artemis.provisioning.ArtemisProvisioningProvider;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.cloud.stream.binder.AbstractMessageChannelBinder;
+import org.springframework.cloud.stream.binder.BinderSpecificPropertiesProvider;
 import org.springframework.cloud.stream.binder.ExtendedConsumerProperties;
 import org.springframework.cloud.stream.binder.ExtendedProducerProperties;
 import org.springframework.cloud.stream.binder.ExtendedPropertiesBinder;
@@ -57,8 +56,6 @@ public class ArtemisMessageChannelBinder extends
 
     private static final String[] DEFAULT_HEADERS = new String[0];
 
-    private final Logger logger = LoggerFactory.getLogger(ArtemisMessageChannelBinder.class);
-
     private final ConnectionFactory connectionFactory;
 
     private final ArtemisExtendedBindingProperties bindingProperties;
@@ -73,7 +70,7 @@ public class ArtemisMessageChannelBinder extends
     @Override
     protected MessageHandler createProducerMessageHandler(ProducerDestination destination,
             ExtendedProducerProperties<ArtemisProducerProperties> properties, MessageChannel errorChannel) {
-        logger.debug("Creating producer message handler for '{}'", destination);
+        logger.debug("Creating producer message handler for '" + destination + "'");
 
         JmsSendingMessageHandler handler = Jms.outboundAdapter(connectionFactory)
                 .destination(message -> getMessageDestination(message, destination))
@@ -88,7 +85,7 @@ public class ArtemisMessageChannelBinder extends
     @Override
     protected MessageProducer createConsumerEndpoint(ConsumerDestination destination, String group,
             ExtendedConsumerProperties<ArtemisConsumerProperties> properties) {
-        logger.debug("Creating consumer endpoint for '{}' with a group '{}'", destination, group);
+        logger.debug("Creating consumer endpoint for '{" + destination + "}' with a group '{" + group + "}'");
 
         if (!StringUtils.hasText(group)) {
             group = getAnonymousGroupName();
@@ -122,6 +119,16 @@ public class ArtemisMessageChannelBinder extends
     }
 
     @Override
+    public String getDefaultsPrefix() {
+        return this.bindingProperties.getDefaultsPrefix();
+    }
+
+    @Override
+    public Class<? extends BinderSpecificPropertiesProvider> getExtendedPropertiesEntryClass() {
+        return this.bindingProperties.getExtendedPropertiesEntryClass();
+    }
+
+    @Override
     protected String errorsBaseName(ConsumerDestination destination, String group,
             ExtendedConsumerProperties<ArtemisConsumerProperties> properties) {
         if (group == null) {
@@ -148,7 +155,7 @@ public class ArtemisMessageChannelBinder extends
             return destination.getNameForPartition((Integer) partition);
         }
         if (partition instanceof String) {
-            return destination.getNameForPartition(Integer.valueOf((String) partition));
+            return destination.getNameForPartition(Integer.parseInt((String) partition));
         }
         throw new IllegalArgumentException(
                 String.format("The provided partition '%s' is not a valid format", partition));

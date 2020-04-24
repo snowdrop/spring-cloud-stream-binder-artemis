@@ -39,9 +39,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author <a href="mailto:gytis@redhat.com">Gytis Trikleris</a>
  */
 @RunWith(SpringRunner.class)
-@SpringBootTest(
-        classes = StreamApplication.class
-)
+@SpringBootTest(classes = StreamApplication.class)
 @Import({ DynamicDestinationIT.TestConfiguration.class, DynamicDestinationSource.class })
 public class DynamicDestinationIT {
 

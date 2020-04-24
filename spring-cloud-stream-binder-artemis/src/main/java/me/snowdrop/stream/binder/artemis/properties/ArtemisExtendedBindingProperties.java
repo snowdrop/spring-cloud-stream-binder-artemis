@@ -16,48 +16,33 @@
 
 package me.snowdrop.stream.binder.artemis.properties;
 
-import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.cloud.stream.binder.ExtendedBindingProperties;
-
-import java.util.HashMap;
 import java.util.Map;
+
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.cloud.stream.binder.AbstractExtendedBindingProperties;
+import org.springframework.cloud.stream.binder.BinderSpecificPropertiesProvider;
 
 /**
  * @author <a href="mailto:gytis@redhat.com">Gytis Trikleris</a>
  */
 @ConfigurationProperties("spring.cloud.stream.artemis")
-public class ArtemisExtendedBindingProperties
-        implements ExtendedBindingProperties<ArtemisConsumerProperties, ArtemisProducerProperties> {
+public class ArtemisExtendedBindingProperties extends
+        AbstractExtendedBindingProperties<ArtemisConsumerProperties, ArtemisProducerProperties, ArtemisBindingProperties> {
 
-    private Map<String, ArtemisBindingProperties> bindings = new HashMap<>();
+    public static final String DEFAULT_PREFIX = "spring.cloud.stream.artemis.default";
 
+    @Override
+    public String getDefaultsPrefix() {
+        return DEFAULT_PREFIX;
+    }
+
+    @Override
+    public Class<? extends BinderSpecificPropertiesProvider> getExtendedPropertiesEntryClass() {
+        return ArtemisBindingProperties.class;
+    }
+
+    @Override
     public Map<String, ArtemisBindingProperties> getBindings() {
-        return bindings;
-    }
-
-    public void setBindings(Map<String, ArtemisBindingProperties> bindings) {
-        this.bindings = bindings;
-    }
-
-    @Override
-    public ArtemisConsumerProperties getExtendedConsumerProperties(String channelName) {
-        if (bindings.containsKey(channelName) && bindings.get(channelName)
-                .getConsumer() != null) {
-            return bindings.get(channelName)
-                    .getConsumer();
-        } else {
-            return new ArtemisConsumerProperties();
-        }
-    }
-
-    @Override
-    public ArtemisProducerProperties getExtendedProducerProperties(String channelName) {
-        if (bindings.containsKey(channelName) && bindings.get(channelName)
-                .getProducer() != null) {
-            return bindings.get(channelName)
-                    .getProducer();
-        } else {
-            return new ArtemisProducerProperties();
-        }
+        return this.doGetBindings();
     }
 }

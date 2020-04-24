@@ -8,9 +8,9 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
+import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.cloud.stream.binder.ExtendedConsumerProperties;
-import org.springframework.context.support.AbstractApplicationContext;
+import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.integration.core.MessageProducer;
 import org.springframework.integration.jms.ChannelPublishingJmsMessageListener;
 import org.springframework.integration.jms.JmsMessageDrivenEndpoint;
@@ -30,19 +30,14 @@ public class ArtemisMessageChannelBinderTest {
     private ExtendedConsumerProperties<ArtemisConsumerProperties> mockConsumerProperties;
 
     @Mock
-    private AbstractApplicationContext mockApplicationContext;
-
-    @Mock
-    private ConfigurableListableBeanFactory mockBeanFactory;
+    private DefaultListableBeanFactory mockBeanFactory;
 
     private ArtemisMessageChannelBinder binder;
 
     @Before
     public void before() {
-        given(mockApplicationContext.getBeanFactory()).willReturn(mockBeanFactory);
-
         binder = new ArtemisMessageChannelBinder(null, null, null);
-        binder.setApplicationContext(mockApplicationContext);
+        binder.setApplicationContext(new GenericApplicationContext(mockBeanFactory));
     }
 
     @Test
