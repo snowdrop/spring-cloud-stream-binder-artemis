@@ -107,6 +107,17 @@ Also, if you stumble upon an issues or think that some feature should be added, 
 
 # Releasing
 
+## With GitHub action
+
+GitHub release action is activates with a tag.
+For example, to release a version 1.2.3 create and push the following tag.
+```bash
+git tag release-1.2.3
+git push origin release-1.2.3
+```
+
+## Manually
+
 Dry run:
 ```
 ./mvnw release:prepare -DdryRun
