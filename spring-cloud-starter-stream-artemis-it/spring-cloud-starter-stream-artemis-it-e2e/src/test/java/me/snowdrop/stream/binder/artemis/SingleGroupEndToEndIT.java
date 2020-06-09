@@ -63,7 +63,8 @@ public class SingleGroupEndToEndIT {
     private AlternativeStringStreamListener alternativeListener;
 
     @Test
-    public void shouldSplitMessagesBetweenReceivers() {
+    public void shouldSplitMessagesBetweenReceivers() throws InterruptedException {
+        Thread.sleep(5000);
         source.send("test message 1");
         source.send("test message 2");
 

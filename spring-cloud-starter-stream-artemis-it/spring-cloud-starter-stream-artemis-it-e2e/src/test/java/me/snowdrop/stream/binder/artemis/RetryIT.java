@@ -37,7 +37,8 @@ public class RetryIT {
     private FailingStreamListener listener;
 
     @Test
-    public void shouldRetryFailingDeliveries() {
+    public void shouldRetryFailingDeliveries() throws InterruptedException {
+        Thread.sleep(5000);
         source.send("test message");
 
         await().atMost(10, SECONDS)
