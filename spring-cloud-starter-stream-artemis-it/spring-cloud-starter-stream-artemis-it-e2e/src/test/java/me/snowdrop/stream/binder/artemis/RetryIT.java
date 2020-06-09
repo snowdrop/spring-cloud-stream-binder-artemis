@@ -40,7 +40,7 @@ public class RetryIT {
     public void shouldRetryFailingDeliveries() {
         source.send("test message");
 
-        await().atMost(5, SECONDS)
+        await().atMost(10, SECONDS)
                 .until(listener::getErrorsCounter, is(equalTo(1)));
 
         assertThat(listener.getReceivedMessages())

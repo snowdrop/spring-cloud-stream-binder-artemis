@@ -67,7 +67,7 @@ public class SingleGroupEndToEndIT {
         source.send("test message 1");
         source.send("test message 2");
 
-        await().atMost(5, SECONDS)
+        await().atMost(10, SECONDS)
                 .until(() -> listener.getPayloads().size() == 1 && alternativeListener.getPayloads().size() == 1);
 
         List<String> payloads = listener.getPayloads();
