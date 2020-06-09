@@ -60,10 +60,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author <a href="mailto:gytis@redhat.com">Gytis Trikleris</a>
  */
 @RunWith(SpringRunner.class)
-@SpringBootTest(
-        classes = StreamApplication.class,
-        properties = "spring.jms.cache.enabled=false"
-)
+@SpringBootTest(classes = StreamApplication.class)
 @Import({ ArtemisAutoConfiguration.class, ArtemisBinderAutoConfiguration.class })
 public class PartitionCapableBinderIT extends
         PartitionCapableBinderTests<ArtemisTestBinder, ExtendedConsumerProperties<ArtemisConsumerProperties>,

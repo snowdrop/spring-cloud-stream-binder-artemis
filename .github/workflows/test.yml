@@ -15,5 +15,13 @@ jobs:
         java-version: 11
     - name: Install
       run: ./mvnw install -DskipTests
-    - name: Test
-      run: ./mvnw verify
+    - name: Unit tests
+      run: ./mvnw test
+    - name: Integration tests
+      run:
+        curl -O https://downloads.apache.org/activemq/activemq-artemis/2.13.0/apache-artemis-2.13.0-bin.zip
+        unzip apache-artemis-2.13.0-bin.zip
+        cd apache-artemis-2.13.0
+        ./bin/artemis create test-broker --user=test --password=test --allow-anonymous=true
+        ./test-broker/bin/artemis-service start
+        ./mvnw verify -f spring-cloud-starter-stream-artemis-it
