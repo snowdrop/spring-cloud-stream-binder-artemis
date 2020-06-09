@@ -50,7 +50,6 @@ import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.MessageDeliveryException;
 import org.springframework.messaging.MessageHeaders;
-import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.util.Assert;
 import org.springframework.util.MimeTypeUtils;
@@ -66,7 +65,6 @@ import static org.assertj.core.api.Assertions.assertThat;
         properties = "spring.jms.cache.enabled=false"
 )
 @Import({ ArtemisAutoConfiguration.class, ArtemisBinderAutoConfiguration.class })
-@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_CLASS)
 public class PartitionCapableBinderIT extends
         PartitionCapableBinderTests<ArtemisTestBinder, ExtendedConsumerProperties<ArtemisConsumerProperties>,
                 ExtendedProducerProperties<ArtemisProducerProperties>> {
