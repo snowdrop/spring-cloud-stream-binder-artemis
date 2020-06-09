@@ -18,6 +18,7 @@ package me.snowdrop.stream.binder.artemis.listeners;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.jboss.logging.Logger;
 import org.springframework.cloud.stream.annotation.EnableBinding;
 import org.springframework.cloud.stream.annotation.StreamListener;
 import org.springframework.cloud.stream.messaging.Sink;
@@ -28,10 +29,13 @@ import org.springframework.cloud.stream.messaging.Sink;
 @EnableBinding(Sink.class)
 public class StringStreamListener {
 
-    private List<String> payloads = new LinkedList<>();
+    private final Logger logger = Logger.getLogger(StringStreamListener.class);
+
+    private final List<String> payloads = new LinkedList<>();
 
     @StreamListener(Sink.INPUT)
     public void streamListener(String payload) {
+        logger.debug("received: " + payload);
         payloads.add(payload);
     }
 

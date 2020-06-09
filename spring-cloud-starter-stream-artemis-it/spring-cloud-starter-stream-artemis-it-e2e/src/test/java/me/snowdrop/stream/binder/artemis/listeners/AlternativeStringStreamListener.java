@@ -19,6 +19,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import me.snowdrop.stream.binder.artemis.application.AlternativeSink;
+import org.jboss.logging.Logger;
 import org.springframework.cloud.stream.annotation.EnableBinding;
 import org.springframework.cloud.stream.annotation.StreamListener;
 
@@ -28,10 +29,13 @@ import org.springframework.cloud.stream.annotation.StreamListener;
 @EnableBinding(AlternativeSink.class)
 public class AlternativeStringStreamListener {
 
-    private List<String> payloads = new LinkedList<>();
+    private final Logger logger = Logger.getLogger(AlternativeStringStreamListener.class);
+
+    private final List<String> payloads = new LinkedList<>();
 
     @StreamListener(AlternativeSink.ALTERNATIVE_INPUT)
     public void streamListener(String payload) {
+        logger.debug("received: " + payload);
         payloads.add(payload);
     }
 

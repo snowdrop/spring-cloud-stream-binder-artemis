@@ -15,6 +15,7 @@
  */
 package me.snowdrop.stream.binder.artemis.sources;
 
+import org.jboss.logging.Logger;
 import org.springframework.cloud.stream.annotation.EnableBinding;
 import org.springframework.cloud.stream.messaging.Source;
 import org.springframework.integration.support.MessageBuilder;
@@ -26,6 +27,8 @@ import org.springframework.messaging.Message;
 @EnableBinding(Source.class)
 public class StringStreamSource {
 
+    private final Logger logger = Logger.getLogger(StringStreamSource.class);
+
     private final Source source;
 
     public StringStreamSource(Source source) {
@@ -33,6 +36,7 @@ public class StringStreamSource {
     }
 
     public void send(String payload) {
+        logger.debug("sending " + payload);
         Message<String> message = MessageBuilder
                 .withPayload(payload)
                 .build();

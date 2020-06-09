@@ -15,6 +15,7 @@
  */
 package me.snowdrop.stream.binder.artemis.sources;
 
+import org.jboss.logging.Logger;
 import org.springframework.cloud.stream.annotation.EnableBinding;
 import org.springframework.cloud.stream.binding.BinderAwareChannelResolver;
 import org.springframework.integration.support.MessageBuilder;
@@ -26,6 +27,8 @@ import org.springframework.messaging.Message;
 @EnableBinding
 public class DynamicDestinationSource {
 
+    private final Logger logger = Logger.getLogger(DynamicDestinationSource.class);
+
     private final BinderAwareChannelResolver channelResolver;
 
     public DynamicDestinationSource(BinderAwareChannelResolver channelResolver) {
@@ -33,6 +36,7 @@ public class DynamicDestinationSource {
     }
 
     public void send(String destination, String payload) {
+        logger.debug("sending " + payload + " to " + destination);
         Message<String> message = MessageBuilder
                 .withPayload(payload)
                 .build();
