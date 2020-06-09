@@ -22,5 +22,5 @@ jobs:
         curl -O https://downloads.apache.org/activemq/activemq-artemis/2.13.0/apache-artemis-2.13.0-bin.zip
         unzip apache-artemis-2.13.0-bin.zip
         ./apache-artemis-2.13.0/bin/artemis create --user test --password test --allow-anonymous true test-broker
-        ./apache-artemis-2.13.0/test-broker/bin/artemis-service start
+        ./test-broker/bin/artemis-service start
         ./mvnw verify -f spring-cloud-starter-stream-artemis-it
