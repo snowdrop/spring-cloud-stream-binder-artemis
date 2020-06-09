@@ -18,7 +18,7 @@ jobs:
     - name: Unit tests
       run: ./mvnw test
     - name: Integration tests
-      run:
+      run: |
         curl -O https://downloads.apache.org/activemq/activemq-artemis/2.13.0/apache-artemis-2.13.0-bin.zip
         unzip apache-artemis-2.13.0-bin.zip
         cd apache-artemis-2.13.0
