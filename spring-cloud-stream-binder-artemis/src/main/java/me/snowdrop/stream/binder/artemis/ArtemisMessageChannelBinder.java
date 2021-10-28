@@ -94,7 +94,7 @@ public class ArtemisMessageChannelBinder extends
         String subscriptionName = getQueueName(destination.getName(), group);
         ListenerContainerFactory listenerContainerFactory = new ListenerContainerFactory(connectionFactory);
         AbstractMessageListenerContainer listenerContainer = listenerContainerFactory
-                .getListenerContainer(destination.getName(), subscriptionName);
+                .getListenerContainer(destination.getName(), subscriptionName, properties);
 
         if (properties.getMaxAttempts() == 1) {
             return Jms.messageDrivenChannelAdapter(listenerContainer).get();
