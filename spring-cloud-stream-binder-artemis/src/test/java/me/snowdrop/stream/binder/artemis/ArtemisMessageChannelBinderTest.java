@@ -50,6 +50,7 @@ public class ArtemisMessageChannelBinderTest {
     @Test
     public void shouldCreateRegularConsumerEndpoint() {
         given(mockConsumerProperties.getMaxAttempts()).willReturn(1);
+        given(mockConsumerProperties.getConcurrency()).willReturn(1);
 
         ArtemisConsumerDestination destination = new ArtemisConsumerDestination("test-destination");
         MessageProducer producer = binder.createConsumerEndpoint(destination, "test-group", mockConsumerProperties);
@@ -63,6 +64,7 @@ public class ArtemisMessageChannelBinderTest {
     @Test
     public void shouldCreateRetryableConsumerEndpoint() {
         given(mockConsumerProperties.getMaxAttempts()).willReturn(2);
+        given(mockConsumerProperties.getConcurrency()).willReturn(1);
 
         ArtemisConsumerDestination destination = new ArtemisConsumerDestination("test-destination");
         MessageProducer producer = binder.createConsumerEndpoint(destination, "test-group", mockConsumerProperties);
