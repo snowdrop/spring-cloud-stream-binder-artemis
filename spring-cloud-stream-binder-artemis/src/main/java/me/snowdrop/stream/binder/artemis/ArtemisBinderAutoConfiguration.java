@@ -54,9 +54,8 @@ public class ArtemisBinderAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    ArtemisMessageChannelBinder artemisMessageChannelBinder(ArtemisProvisioningProvider provisioningProvider,
-            ConnectionFactory connectionFactory, ArtemisExtendedBindingProperties bindingProperties) {
-        return new ArtemisMessageChannelBinder(provisioningProvider, connectionFactory, bindingProperties);
+    ArtemisMessageChannelBinder artemisMessageChannelBinder(ArtemisProvisioningProvider provisioningProvider, ArtemisExtendedBindingProperties bindingProperties, ListenerContainerFactory listenerContainerFactory) {
+        return new ArtemisMessageChannelBinder(provisioningProvider, bindingProperties, listenerContainerFactory);
     }
 
     @Bean

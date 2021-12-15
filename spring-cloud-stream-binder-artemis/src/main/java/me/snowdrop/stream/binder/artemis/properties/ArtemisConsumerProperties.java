@@ -20,4 +20,14 @@ package me.snowdrop.stream.binder.artemis.properties;
  * @author <a href="mailto:gytis@redhat.com">Gytis Trikleris</a>
  */
 public class ArtemisConsumerProperties extends ArtemisCommonProperties {
+
+    private boolean durableSubscription = true;
+
+    public boolean isDurableSubscription() {
+        return durableSubscription;
+    }
+
+    public void setDurableSubscription(boolean durableSubscription) {
+        this.durableSubscription = durableSubscription;
+    }
 }
