@@ -56,15 +56,15 @@ public class ArtemisMessageChannelBinder extends
 
     private static final String[] DEFAULT_HEADERS = new String[0];
 
-    private final ConnectionFactory connectionFactory;
-
     private final ArtemisExtendedBindingProperties bindingProperties;
 
-    public ArtemisMessageChannelBinder(ArtemisProvisioningProvider provisioningProvider,
-            ConnectionFactory connectionFactory, ArtemisExtendedBindingProperties bindingProperties) {
+    private final ListenerContainerFactory listenerContainerFactory;
+
+    public ArtemisMessageChannelBinder(ArtemisProvisioningProvider provisioningProvider, ArtemisExtendedBindingProperties bindingProperties,
+            ListenerContainerFactory listenerContainerFactory) {
         super(DEFAULT_HEADERS, provisioningProvider);
-        this.connectionFactory = connectionFactory;
         this.bindingProperties = bindingProperties;
+        this.listenerContainerFactory = listenerContainerFactory;
     }
 
     @Override
@@ -72,7 +72,7 @@ public class ArtemisMessageChannelBinder extends
             ExtendedProducerProperties<ArtemisProducerProperties> properties, MessageChannel errorChannel) {
         logger.debug("Creating producer message handler for '" + destination + "'");
 
-        JmsSendingMessageHandler handler = Jms.outboundAdapter(connectionFactory)
+        JmsSendingMessageHandler handler = Jms.outboundAdapter(listenerContainerFactory.getConnectionFactory())
                 .destination(message -> getMessageDestination(message, destination))
                 .configureJmsTemplate(templateSpec -> templateSpec.pubSubDomain(true))
                 .get();
@@ -92,9 +92,8 @@ public class ArtemisMessageChannelBinder extends
         }
 
         String subscriptionName = getQueueName(destination.getName(), group);
-        ListenerContainerFactory listenerContainerFactory = new ListenerContainerFactory(connectionFactory);
         AbstractMessageListenerContainer listenerContainer = listenerContainerFactory
-                .getListenerContainer(destination.getName(), subscriptionName);
+                .getListenerContainer(destination.getName(), subscriptionName, properties);
 
         if (properties.getMaxAttempts() == 1) {
             return Jms.messageDrivenChannelAdapter(listenerContainer).get();

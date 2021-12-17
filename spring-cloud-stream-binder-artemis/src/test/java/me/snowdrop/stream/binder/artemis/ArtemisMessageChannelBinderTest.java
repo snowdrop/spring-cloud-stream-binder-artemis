@@ -1,12 +1,15 @@
 package me.snowdrop.stream.binder.artemis;
 
+import me.snowdrop.stream.binder.artemis.listener.ListenerContainerFactory;
 import me.snowdrop.stream.binder.artemis.listener.RetryableChannelPublishingJmsMessageListener;
 import me.snowdrop.stream.binder.artemis.properties.ArtemisConsumerProperties;
+import me.snowdrop.stream.binder.artemis.properties.ArtemisExtendedBindingProperties;
 import me.snowdrop.stream.binder.artemis.provisioning.ArtemisConsumerDestination;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.cloud.stream.binder.ExtendedConsumerProperties;
@@ -36,7 +39,8 @@ public class ArtemisMessageChannelBinderTest {
 
     @Before
     public void before() {
-        binder = new ArtemisMessageChannelBinder(null, null, null);
+        Mockito.when(mockConsumerProperties.getExtension()).thenReturn(new ArtemisConsumerProperties());
+        binder = new ArtemisMessageChannelBinder(null, null, new ListenerContainerFactory(null));
         binder.setApplicationContext(new GenericApplicationContext(mockBeanFactory));
     }
 

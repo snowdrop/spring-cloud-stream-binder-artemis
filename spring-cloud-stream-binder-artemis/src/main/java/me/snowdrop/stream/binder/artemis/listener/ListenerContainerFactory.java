@@ -16,10 +16,13 @@
 
 package me.snowdrop.stream.binder.artemis.listener;
 
+import org.springframework.cloud.stream.binder.ExtendedConsumerProperties;
 import org.springframework.jms.listener.AbstractMessageListenerContainer;
 import org.springframework.jms.listener.DefaultMessageListenerContainer;
 
 import javax.jms.ConnectionFactory;
+
+import me.snowdrop.stream.binder.artemis.properties.ArtemisConsumerProperties;
 
 /**
  * @author <a href="mailto:gytis@redhat.com">Gytis Trikleris</a>
@@ -32,14 +35,18 @@ public class ListenerContainerFactory {
         this.connectionFactory = connectionFactory;
     }
 
-    public AbstractMessageListenerContainer getListenerContainer(String topic, String subscriptionName) {
+    public ConnectionFactory getConnectionFactory() {
+        return connectionFactory;
+    }
+
+    public AbstractMessageListenerContainer getListenerContainer(String topic, String subscriptionName, ExtendedConsumerProperties<ArtemisConsumerProperties> extendedConsumerProperties) {
         DefaultMessageListenerContainer listenerContainer = new DefaultMessageListenerContainer();
         listenerContainer.setConnectionFactory(connectionFactory);
         listenerContainer.setPubSubDomain(true);
         listenerContainer.setDestinationName(topic);
         listenerContainer.setSubscriptionName(subscriptionName);
         listenerContainer.setSessionTransacted(true);
-        listenerContainer.setSubscriptionDurable(true);
+        listenerContainer.setSubscriptionDurable(extendedConsumerProperties.getExtension().isDurableSubscription());
         listenerContainer.setSubscriptionShared(true);
         return listenerContainer;
     }
